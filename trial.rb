@@ -17,11 +17,12 @@ class Trial
   end
 
   def simulate
+    attacking_unit, defending_unit = @setup_combat.call
     fighting = true
     rounds = 0
     while fighting
       rounds += 1
-      result = @round_runner.simulate(*@setup_combat.call)
+      result = @round_runner.simulate(attacking_unit, defending_unit)
       @results[result] += 1
       if result == ATTACKER_WIN
         fighting = false
