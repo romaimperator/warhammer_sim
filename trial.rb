@@ -1,3 +1,5 @@
+require_relative 'trial_result'
+
 class Trial
   attr_reader :results
 
@@ -19,29 +21,29 @@ class Trial
   def simulate
     attacking_unit, defending_unit = @setup_combat.call
     fighting = true
-    rounds = 0
+    rounds = []
     while fighting
-      rounds += 1
       result = @round_runner.simulate(attacking_unit, defending_unit)
-      @results[result] += 1
-      if result == ATTACKER_WIN
+      rounds << result
+      @results[result.outcome] += 1
+      if result.outcome == ATTACKER_WIN
         fighting = false
-      elsif result == DEFENDER_WIN
+      elsif result.outcome == DEFENDER_WIN
         fighting = false
-      elsif result == ATTACKER_FLEE
+      elsif result.outcome == ATTACKER_FLEE
         fighting = false
-      elsif result == DEFENDER_FLEE
+      elsif result.outcome == DEFENDER_FLEE
         fighting = false
-      elsif result == BOTH_DEAD
+      elsif result.outcome == BOTH_DEAD
         fighting = false
-      elsif result == ATTACKER_HOLD
-      elsif result == DEFENDER_HOLD
-      elsif result == TIE
+      elsif result.outcome == ATTACKER_HOLD
+      elsif result.outcome == DEFENDER_HOLD
+      elsif result.outcome == TIE
       else
         raise Exception.new("Bad result")
       end
     end
-    rounds
+    TrialResult.new(rounds.last.outcome, rounds)
   end
 end
 

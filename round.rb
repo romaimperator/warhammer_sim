@@ -1,5 +1,10 @@
+require_relative 'round_result'
+require_relative 'round_stats'
+
 class Round
   def simulate(attacker, defender)
+    attacker_attacks = attacker.attacks
+    defender_attacks = defender.attacks
     if attacker.initiative > defender.initiative || attacker.strike_first?
       defender.take_wounds(attack(attacker, defender))
       attacker.take_wounds(attack(defender, attacker))
@@ -13,7 +18,7 @@ class Round
       defender.take_wounds(attacker_caused_wounds)
     end
 
-    if attacker.dead? && defender.dead?
+    outcome = if attacker.dead? && defender.dead?
       BOTH_DEAD
     elsif defender.dead?
       ATTACKER_WIN
@@ -22,6 +27,12 @@ class Round
     else
       compute_combat_resolution(attacker, defender)
     end
+
+    RoundResult.new(
+      outcome,
+      RoundStats.new(attacker_attacks, attacker.wounds_caused),
+      RoundStats.new(defender_attacks, defender.wounds_caused)
+    )
   end
 
   def attack(attacker, defender)

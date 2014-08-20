@@ -15,7 +15,7 @@ def main
      Unit.new(Model.new("spearman", 3, 3, 3, 1, 3, 1, 7, 6, 7), 30, 10)]
   end
 
-  round_dist = (1..NUMBER_OF_TRIALS).map do |round_number|
+  trial_results = (1..NUMBER_OF_TRIALS).map do |round_number|
     trial_runner.simulate
   end
 
@@ -23,6 +23,7 @@ def main
     [k, "#{v}, #{v.to_f / NUMBER_OF_TRIALS}"]
   end]
 
+  round_dist = trial_results.map(&:number_of_rounds)
   puts "Average Rounds: #{mean(round_dist)} Max Rounds: #{round_dist.max} Min Rounds: #{round_dist.min} Std. Dev.: #{standard_deviation(round_dist, mean(round_dist))}"
   puts "Battle statistics:"
   puts "Wins:           #{results[ATTACKER_WIN]}"
