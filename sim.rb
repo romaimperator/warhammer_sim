@@ -9,6 +9,7 @@ require_relative 'unit'
 require_relative 'simulation'
 require_relative 'equipment/halberd'
 require_relative 'equipment/spear'
+require_relative 'equipment/sword_of_striking'
 
 NUMBER_OF_TRIALS = 10000
 

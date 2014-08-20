@@ -45,11 +45,17 @@ class Unit < Struct.new(:model, :size, :width, :equipment)
     total_stats
   end
 
-  def roll_hits(round_number, defender)
+  def hit_needed(round_number, defender)
     roll_needed = ComputeHitNeeded.hit_needed(stats(round_number).weapon_skill, defender.weapon_skill)
+    equipment.each do |item|
+      roll_needed = item.hit_needed(round_number, roll_needed)
+    end
+    roll_needed
+  end
 
+  def roll_hits(round_number, defender)
     #puts "Attacks: #{attacks} Size: #{size}"
-    roll_dice(attacks(round_number), roll_needed)
+    roll_dice(attacks(round_number), hit_needed(round_number, defender))
   end
 
   def roll_wounds(round_number, hits, defender)
