@@ -2,9 +2,13 @@ require_relative 'round_result'
 require_relative 'round_stats'
 
 class Round
+  def initialize(number)
+    @number = number
+  end
+
   def simulate(attacker, defender)
-    attacker_attacks = attacker.attacks
-    defender_attacks = defender.attacks
+    attacker_attacks = attacker.attacks(@number)
+    defender_attacks = defender.attacks(@number)
     if attacker.initiative > defender.initiative || attacker.strike_first?
       defender.take_wounds(attack(attacker, defender))
       attacker.take_wounds(attack(defender, attacker))
@@ -36,8 +40,8 @@ class Round
   end
 
   def attack(attacker, defender)
-    hits = attacker.roll_hits(defender)
-    wounds = attacker.roll_wounds(hits, defender)
+    hits = attacker.roll_hits(@number, defender)
+    wounds = attacker.roll_wounds(@number, hits, defender)
     unsaved_wounds = defender.roll_saves(wounds, attacker.strength)
     attacker.wounds_caused = unsaved_wounds
   end

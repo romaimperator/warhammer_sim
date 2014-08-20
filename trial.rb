@@ -3,9 +3,8 @@ require_relative 'trial_result'
 class Trial
   attr_reader :results
 
-  def initialize(round_runner, &block)
+  def initialize(&block)
     @setup_combat = block
-    @round_runner = round_runner
   end
 
   def simulate
@@ -13,7 +12,7 @@ class Trial
     fighting = true
     rounds = []
     while fighting
-      result = @round_runner.simulate(attacking_unit, defending_unit)
+      result = Round.new(rounds.size + 1).simulate(attacking_unit, defending_unit)
       rounds << result
       if result.outcome == ATTACKER_WIN
         fighting = false

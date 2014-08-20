@@ -1,19 +1,59 @@
 require_relative 'compute_hit_needed'
 require_relative 'compute_wound_needed'
 
-class Unit < Struct.new(:model, :size, :width)
+class Unit < Struct.new(:model, :size, :width, :equipment)
   def dead?
     size <= 0
   end
 
-  def roll_hits(defender)
-    roll_needed = ComputeHitNeeded.hit_needed(weapon_skill, defender.weapon_skill)
-
-    roll_dice(model.attacks * size, roll_needed)
+  def base_attacks
+    return 0 if model.attacks == 0
+    if is_horde?
+      [size, 3 * width].min + (model.attacks - 1) * width
+    else
+      [size, 2 * width].min + (model.attacks - 1) * width
+    end
   end
 
-  def roll_wounds(hits, defender)
-    roll_needed = ComputeWoundNeeded.wound_needed(strength, defender.toughness)
+  def attacks(round_number)
+    total_attacks = base_attacks
+    equipment.each do |item|
+      total_attacks = item.attacks(round_number, total_attacks, self)
+    end
+    total_attacks
+  end
+
+  def models_in_rank(rank_number)
+    if size >= rank_number * width
+      width
+    elsif size >= (rank_number - 1) * width
+      size - (rank_number - 1) * width
+    else
+      0
+    end
+  end
+
+  def is_horde?
+    width >= 10
+  end
+
+  def stats(round_number)
+    total_stats = model.dup
+    equipment.each do |item|
+      total_stats = item.stats(round_number, total_stats)
+    end
+    total_stats
+  end
+
+  def roll_hits(round_number, defender)
+    roll_needed = ComputeHitNeeded.hit_needed(stats(round_number).weapon_skill, defender.weapon_skill)
+
+    #puts "Attacks: #{attacks} Size: #{size}"
+    roll_dice(attacks(round_number), roll_needed)
+  end
+
+  def roll_wounds(round_number, hits, defender)
+    roll_needed = ComputeWoundNeeded.wound_needed(stats(round_number).strength, defender.toughness)
 
     roll_dice(hits, roll_needed)
   end
