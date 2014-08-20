@@ -6,16 +6,6 @@ class Trial
   def initialize(round_runner, &block)
     @setup_combat = block
     @round_runner = round_runner
-    @results = {
-      ATTACKER_WIN => 0,
-      DEFENDER_WIN => 0,
-      ATTACKER_FLEE => 0,
-      DEFENDER_FLEE => 0,
-      ATTACKER_HOLD => 0,
-      DEFENDER_HOLD => 0,
-      TIE => 0,
-      BOTH_DEAD => 0
-    }
   end
 
   def simulate
@@ -25,7 +15,6 @@ class Trial
     while fighting
       result = @round_runner.simulate(attacking_unit, defending_unit)
       rounds << result
-      @results[result.outcome] += 1
       if result.outcome == ATTACKER_WIN
         fighting = false
       elsif result.outcome == DEFENDER_WIN
