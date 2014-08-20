@@ -1,24 +1,19 @@
+require_relative 'compute_hit_needed'
+require_relative 'compute_wound_needed'
+
 class Unit < Struct.new(:model, :size, :width)
   def dead?
     size <= 0
   end
 
   def roll_hits(defender)
-    if weapon_skill - defender.weapon_skill > 0
-      roll_needed = 3
-    elsif defender.weapon_skill > (2 * weapon_skill)
-      roll_needed = 5
-    else
-      roll_needed = 4
-    end
+    roll_needed = ComputeHitNeeded.hit_needed(weapon_skill, defender.weapon_skill)
 
     roll_dice(model.attacks * size, roll_needed)
   end
 
   def roll_wounds(hits, defender)
-    roll_needed = defender.toughness - strength + 4
-    roll_needed = 6 if roll_needed > 6
-    roll_needed = 2 if roll_needed < 2
+    roll_needed = ComputeWoundNeeded.wound_needed(strength, defender.toughness)
 
     roll_dice(hits, roll_needed)
   end
