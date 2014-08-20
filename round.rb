@@ -50,7 +50,7 @@ class Round
     res_difference = attacker.combat_res_earned - defender.combat_res_earned
 
     if res_difference > 0
-      if defender.roll_break_test(res_difference)
+      if defender.roll_break_test(res_difference, attacker.number_of_ranks)
         if attacker.roll_pursuit >= defender.roll_flee
           ATTACKER_WIN
         else
@@ -62,7 +62,7 @@ class Round
     elsif res_difference == 0
       TIE
     else
-      if attacker.roll_break_test(-res_difference)
+      if attacker.roll_break_test(-res_difference, defender.number_of_ranks)
         if defender.roll_pursuit >= attacker.roll_flee
           DEFENDER_WIN
         else

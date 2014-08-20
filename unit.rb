@@ -83,9 +83,12 @@ class Unit < Struct.new(:model, :size, :width, :equipment)
     rank_bonus + banner + wounds_caused + overkill + charge + flank_or_rear
   end
 
+  def number_of_ranks
+    size / width + (size % width > 5 ? 1 : 0)
+  end
+
   def rank_bonus
-    ranks = size / width + (size % width > 5 ? 1 : 0)
-    [ranks - 1, 3].min
+    [number_of_ranks - 1, 3].min
   end
 
   def banner
@@ -112,13 +115,17 @@ class Unit < Struct.new(:model, :size, :width, :equipment)
     0
   end
 
-  def roll_break_test(modifier)
+  def roll_break_test(modifier, defender_ranks)
     result = sum_roll(2)
-    if result - modifier <= model.leadership || result == 2
-      FALSE
+    if is_steadfast?(defender_ranks)
+      result > model.leadership && result != 2
     else
-      TRUE
+      result - modifier > model.leadership && result != 2
     end
+  end
+
+  def is_steadfast?(defender_ranks)
+    number_of_ranks > defender_ranks
   end
 
   def roll_pursuit
