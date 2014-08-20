@@ -10,6 +10,9 @@ require_relative 'simulation'
 require_relative 'equipment/halberd'
 require_relative 'equipment/spear'
 require_relative 'equipment/sword_of_striking'
+require_relative 'equipment/reroll_misses'
+require_relative 'equipment/reroll_wounds'
+require_relative 'equipment/murderous_prowess'
 
 NUMBER_OF_TRIALS = 10000
 
@@ -19,12 +22,14 @@ def main
     Trial.new do
       [
         Unit.new(
-          Model.new("halberd", 3, 3, 3, 1, 3, 1, 7, 6, 7), 40, 10, [
-            Halberd.new,
+          Model.new("halberd", 3, 3, 3, 1, 3, 3, 7, 6, 7), 20, 5, [
+            #Halberd.new,
+            RerollMisses.new,
+            MurderousProwess.new,
           ]
         ),
         Unit.new(
-          Model.new("spearman", 3, 3, 3, 1, 3, 1, 7, 6, 7), 40, 10, [
+          Model.new("spearman", 3, 3, 3, 1, 3, 1, 7, 5, 7), 40, 10, [
             FootSpear.new,
           ]
         )

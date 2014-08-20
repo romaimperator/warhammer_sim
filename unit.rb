@@ -53,15 +53,12 @@ class Unit < Struct.new(:model, :size, :width, :equipment)
     roll_needed
   end
 
-  def roll_hits(round_number, defender)
-    #puts "Attacks: #{attacks} Size: #{size}"
-    roll_dice(attacks(round_number), hit_needed(round_number, defender))
-  end
-
-  def roll_wounds(round_number, hits, defender)
+  def wound_needed(round_number, defender)
     roll_needed = ComputeWoundNeeded.wound_needed(stats(round_number).strength, defender.toughness)
-
-    roll_dice(hits, roll_needed)
+    equipment.each do |item|
+      roll_needed = item.wound_needed(round_number, roll_needed)
+    end
+    roll_needed
   end
 
   def roll_saves(caused_wounds, attacker_strength)
@@ -69,6 +66,22 @@ class Unit < Struct.new(:model, :size, :width, :equipment)
     roll_needed = armor_save + save_modifier
 
     caused_wounds - roll_dice(caused_wounds, roll_needed)
+  end
+
+  def hit_reroll_values(round_number, hit_needed)
+    values = []
+    equipment.each do |item|
+      values += item.hit_reroll_values(round_number, hit_needed)
+    end
+    values.uniq
+  end
+
+  def wound_reroll_values(round_number, wound_needed)
+    values = []
+    equipment.each do |item|
+      values += item.wound_reroll_values(round_number, wound_needed)
+    end
+    values.uniq
   end
 
   def take_wounds(unsaved_wounds)
