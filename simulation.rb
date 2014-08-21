@@ -71,8 +71,8 @@ class Simulation
     puts
     puts "Battle Statistics:"
     [
-      ["Wins:", attacker_wins],
-      ["Losses:", defender_wins],
+      ["Attacker Wins:", attacker_wins],
+      ["Defender Wins:", defender_wins],
       ["Attacker Flees:", attacker_flee],
       ["Defender Flees:", defender_flee],
       ["Both Dead:", both_dead],
