@@ -50,11 +50,11 @@ class Simulation
   end
 
   def attacker_wounds_each_round
-    @trial_results.map(&:wounds_caused_by_attacker_each_round).flatten
+    @trial_results.map(&:wounds_caused_by_attacker_each_round)
   end
 
   def defender_wounds_each_round
-    @trial_results.map(&:wounds_caused_by_defender_each_round).flatten
+    @trial_results.map(&:wounds_caused_by_defender_each_round)
   end
 
   def standard_deviation(dist, mean)
@@ -84,31 +84,53 @@ class Simulation
     puts
     print_distribution_results("Defender", "Wounds", defender_wounds)
     puts
-    print_distribution_results("Attacker each round", "Wounds", attacker_wounds_each_round)
+    print_distribution_results("Attacker first round", "Wounds", attacker_wounds_each_round.map { |v| v[0] })
     puts
-    print_distribution_results("Defender each round", "Wounds", defender_wounds_each_round)
+    print_distribution_results("Defender first round", "Wounds", defender_wounds_each_round.map { |v| v[0] })
 
-    aw = attacker_wounds_each_round.group_by { |i| i }.map { |k,v| [k, v.size] }.sort_by { |i| i[0] }
-    dw = defender_wounds_each_round.group_by { |i| i }.map { |k,v| [k, v.size] }.sort_by { |i| i[0] }
+    #aw = attacker_wounds_each_round.flatten.group_by { |i| i }.map { |k,v| [k, v.size] }.sort_by { |i| i[0] }
+    #dw = defender_wounds_each_round.flatten.group_by { |i| i }.map { |k,v| [k, v.size] }.sort_by { |i| i[0] }
     require 'gnuplot'
     Gnuplot.open do |gp|
       Gnuplot::Plot.new( gp ) do |plot|
 
         plot.terminal "gif"
         plot.output File.expand_path("../attacker_wounds_per_round.gif", __FILE__)
-        plot.title  "Attacker wounds per round"
-        plot.xlabel "wounds per round"
-        plot.ylabel "rounds"
+        plot.title  "Attacker wounds first round"
+        plot.xlabel "wounds first round"
+        plot.ylabel "trials"
         plot.xtics  "0, 2"
         plot.xtics  "scale 2, 1"
         plot.mxtics "2"
 
-        x = aw.map { |aw| aw[0] }
-        y = aw.map { |aw| aw[1] }
-
-        plot.data << Gnuplot::DataSet.new( [x, y] ) do |ds|
+        plot.data << Gnuplot::DataSet.new( get_dataset_for_round(attacker_wounds_each_round, 1) ) do |ds|
           ds.with = "linespoints"
-          ds.notitle
+          ds.title = "First Round"
+        end
+
+        plot.data << Gnuplot::DataSet.new( get_dataset_for_round(attacker_wounds_each_round, 2) ) do |ds|
+          ds.with = "linespoints"
+          ds.title = "Second Round"
+        end
+
+        plot.data << Gnuplot::DataSet.new( get_dataset_for_round(attacker_wounds_each_round, 3) ) do |ds|
+          ds.with = "linespoints"
+          ds.title = "Third Round"
+        end
+
+        plot.data << Gnuplot::DataSet.new( get_dataset_for_round(attacker_wounds_each_round, 4) ) do |ds|
+          ds.with = "linespoints"
+          ds.title = "Fourth Round"
+        end
+
+        plot.data << Gnuplot::DataSet.new( get_dataset_for_round(attacker_wounds_each_round, 5) ) do |ds|
+          ds.with = "linespoints"
+          ds.title = "Fifth Round"
+        end
+
+        plot.data << Gnuplot::DataSet.new( get_dataset_for_round(attacker_wounds_each_round, 6) ) do |ds|
+          ds.with = "linespoints"
+          ds.title = "Sixth Round"
         end
       end
     end
@@ -117,23 +139,57 @@ class Simulation
       Gnuplot::Plot.new( gp ) do |plot|
         plot.terminal "gif"
         plot.output File.expand_path("../defender_wounds_per_round.gif", __FILE__)
-        plot.title  "Defender wounds per round"
-        plot.xlabel "wounds per round"
-        plot.ylabel "rounds"
+        plot.title  "Defender wounds first round"
+        plot.xlabel "wounds first round"
+        plot.ylabel "trials"
         plot.xtics  "0, 2"
         plot.xtics  "scale 2, 1"
         plot.mxtics "2"
 
-        x = dw.map { |dw| dw[0] }
-        y = dw.map { |dw| dw[1] }
-
-        plot.data << Gnuplot::DataSet.new( [x, y] ) do |ds|
+        plot.data << Gnuplot::DataSet.new( get_dataset_for_round(defender_wounds_each_round, 1) ) do |ds|
           ds.with = "linespoints"
-          ds.notitle
+          ds.title = "First Round"
+        end
+
+        plot.data << Gnuplot::DataSet.new( get_dataset_for_round(defender_wounds_each_round, 2) ) do |ds|
+          ds.with = "linespoints"
+          ds.title = "Second Round"
+        end
+
+        plot.data << Gnuplot::DataSet.new( get_dataset_for_round(defender_wounds_each_round, 3) ) do |ds|
+          ds.with = "linespoints"
+          ds.title = "Third Round"
+        end
+
+        plot.data << Gnuplot::DataSet.new( get_dataset_for_round(defender_wounds_each_round, 4) ) do |ds|
+          ds.with = "linespoints"
+          ds.title = "Fourth Round"
+        end
+
+        plot.data << Gnuplot::DataSet.new( get_dataset_for_round(defender_wounds_each_round, 5) ) do |ds|
+          ds.with = "linespoints"
+          ds.title = "Fifth Round"
+        end
+
+        plot.data << Gnuplot::DataSet.new( get_dataset_for_round(defender_wounds_each_round, 6) ) do |ds|
+          ds.with = "linespoints"
+          ds.title = "Sixth Round"
         end
       end
     end
 
+  end
+
+  def get_data_for_round(data_matrix, round)
+    data_matrix.map { |v| v[round - 1] }.select { |i| not i.nil? }.group_by { |i| i }.map { |k,v| [k, v.size] }.sort_by { |i| i[0] }
+  end
+
+  def get_dataset_for_round(data_matrix, round)
+    data = get_data_for_round(data_matrix, round)
+    [
+      data.map { |i| i[0] },
+      data.map { |i| i[1] },
+    ]
   end
 
   def print_distribution_results(name, measurment_name, dist)
@@ -144,6 +200,8 @@ class Simulation
       ["Min #{measurment_name}:", dist.min],
       ["Std. Dev.:", standard_deviation(dist, mean(dist))],
     ].each { |line| puts line[0].rjust(15) + " " + "#{line[1].round(3)}".rjust(7) }
+    puts "68.2% Range:".rjust(15) + " " + "#{(mean(dist) - standard_deviation(dist, mean(dist))).round(3)} - #{(mean(dist) + standard_deviation(dist, mean(dist))).round(3)}"
+    puts "95% Range:".rjust(15) + " " + "#{(mean(dist) - 2 * standard_deviation(dist, mean(dist))).round(3)} - #{(mean(dist) + 2 * standard_deviation(dist, mean(dist))).round(3)}"
   end
 end
 
