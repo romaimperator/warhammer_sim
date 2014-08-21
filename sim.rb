@@ -23,7 +23,7 @@ def main
     Trial.new do
       [
         Unit.new(
-          Model.new("witch elves", 3, 3, 3, 1, 3, 4, 7, 7, 5), 20, 5, [
+          Model.new("witch elves", 3, 3, 3, 1, 3, 4, 7, 7, 5, 20, 20), 20, 5, [
             PoisonAttacks.new,
             RerollMisses.new,
             RerollWounds.new,
@@ -31,7 +31,7 @@ def main
           ]
         ),
         Unit.new(
-          Model.new("halberd", 3, 3, 3, 1, 3, 1, 7, 6, 7), 40, 10, [
+          Model.new("halberd", 3, 3, 3, 1, 3, 1, 7, 6, 7, 20, 20), 40, 10, [
             Halberd.new,
           ]
         )

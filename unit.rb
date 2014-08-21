@@ -6,17 +6,31 @@ class Unit < Struct.new(:model, :size, :width, :equipment)
     size <= 0
   end
 
-  def base_attacks
-    return 0 if model.attacks == 0
-    if is_horde?
-      [size, 3 * width].min + (model.attacks - 1) * width
+  def models_in_base_contact(defender)
+    if mm_width > defender.mm_width
+      defender.mm_width / model.mm_width + 2
+    elsif mm_width < defender.mm_width
+      width
     else
-      [size, 2 * width].min + (model.attacks - 1) * width
+      width
     end
   end
 
-  def attacks(round_number)
-    total_attacks = base_attacks
+  def mm_width
+    width * model.mm_width
+  end
+
+  def base_attacks(defender)
+    return 0 if model.attacks == 0
+    if is_horde?
+      [size, 3 * models_in_base_contact(defender)].min + (model.attacks - 1) * models_in_base_contact(defender)
+    else
+      [size, 2 * models_in_base_contact(defender)].min + (model.attacks - 1) * models_in_base_contact(defender)
+    end
+  end
+
+  def attacks(round_number, defender)
+    total_attacks = base_attacks(defender)
     equipment.each do |item|
       total_attacks = item.attacks(round_number, total_attacks, self)
     end
@@ -54,7 +68,7 @@ class Unit < Struct.new(:model, :size, :width, :equipment)
   end
 
   def roll_hits(round_number, defender)
-    rolls = ComputeHits.compute(attacks(round_number), hit_needed(round_number, defender), hit_reroll_values(round_number, hit_needed(round_number, defender)))
+    rolls = ComputeHits.compute(attacks(round_number, defender), hit_needed(round_number, defender), hit_reroll_values(round_number, hit_needed(round_number, defender)))
     equipment.each do |item|
       rolls = item.roll_hits(round_number, rolls)
     end
