@@ -29,7 +29,7 @@ def main
           ]
         ),
         Unit.new(
-          Model.new("spearman", 3, 3, 3, 1, 3, 1, 7, 5, 7), 40, 10, [
+          Model.new("spearman", 3, 3, 3, 1, 3, 1, 7, 5, 7), 30, 10, [
             FootSpear.new,
           ]
         )

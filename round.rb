@@ -2,6 +2,7 @@ require_relative 'round_result'
 require_relative 'round_stats'
 require_relative 'compute_hits'
 require_relative 'compute_wounds'
+require_relative 'attack_matchup'
 
 class Round
   def initialize(number)
@@ -42,10 +43,7 @@ class Round
   end
 
   def attack(attacker, defender)
-    hits = ComputeHits.compute(attacker.attacks(@number), attacker.hit_needed(@number, defender), attacker.hit_reroll_values(@number, attacker.hit_needed(@number, defender)))
-    wounds = ComputeWounds.compute(hits, attacker.wound_needed(@number, defender), attacker.wound_reroll_values(@number, attacker.wound_needed(@number, defender)))
-    unsaved_wounds = defender.roll_saves(wounds, attacker.strength)
-    attacker.wounds_caused = unsaved_wounds
+    AttackMatchup.new(@number, attacker, defender).attack
   end
 
   def compute_combat_resolution(attacker, defender)
