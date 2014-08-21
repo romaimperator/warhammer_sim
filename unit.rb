@@ -109,7 +109,7 @@ class Unit < Struct.new(:model, :size, :width, :equipment)
   end
 
   def wounds_caused
-    @wounds_caused
+    @wounds_caused ||= 0
   end
 
   def wounds_caused=(new_value)
