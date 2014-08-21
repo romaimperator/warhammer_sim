@@ -26,8 +26,10 @@ class AttackMatchup
   end
 
   def compute_wounds
-    hits = ComputeHits.compute(number_of_attacks, to_hit_number, hit_reroll_values)
-    wounds = ComputeWounds.compute(hits, to_wound_number, wound_reroll_values)
+    #hits = ComputeHits.compute(number_of_attacks, to_hit_number, hit_reroll_values)
+    #wounds = ComputeWounds.compute(hits, to_wound_number, wound_reroll_values)
+    hits = @attacker.roll_hits(@number, @defender)
+    wounds = @attacker.roll_wounds(@number, hits, @defender)
     unsaved_wounds = @defender.roll_saves(wounds, @attacker.strength)
     @attacker.wounds_caused = unsaved_wounds
   end

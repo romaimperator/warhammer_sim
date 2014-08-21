@@ -13,6 +13,7 @@ require_relative 'equipment/sword_of_striking'
 require_relative 'equipment/reroll_misses'
 require_relative 'equipment/reroll_wounds'
 require_relative 'equipment/murderous_prowess'
+require_relative 'equipment/poison_attacks'
 
 NUMBER_OF_TRIALS = 10000
 
@@ -22,15 +23,16 @@ def main
     Trial.new do
       [
         Unit.new(
-          Model.new("halberd", 3, 3, 3, 1, 3, 3, 7, 6, 7), 20, 5, [
-            #Halberd.new,
+          Model.new("witch elves", 3, 3, 3, 1, 3, 4, 7, 7, 5), 20, 5, [
+            PoisonAttacks.new,
             RerollMisses.new,
+            RerollWounds.new,
             MurderousProwess.new,
           ]
         ),
         Unit.new(
-          Model.new("spearman", 3, 3, 3, 1, 3, 1, 7, 5, 7), 30, 10, [
-            FootSpear.new,
+          Model.new("halberd", 3, 3, 3, 1, 3, 1, 7, 6, 7), 40, 10, [
+            Halberd.new,
           ]
         )
       ]

@@ -22,5 +22,13 @@ class Equipment
   def wound_reroll_values(round_number, wound_needed)
     []
   end
+
+  def roll_hits(round_number, rolls)
+    rolls
+  end
+
+  def roll_wounds(round_number, rolls)
+    rolls
+  end
 end
 

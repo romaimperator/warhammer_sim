@@ -53,6 +53,22 @@ class Unit < Struct.new(:model, :size, :width, :equipment)
     roll_needed
   end
 
+  def roll_hits(round_number, defender)
+    rolls = ComputeHits.compute(attacks(round_number), hit_needed(round_number, defender), hit_reroll_values(round_number, hit_needed(round_number, defender)))
+    equipment.each do |item|
+      rolls = item.roll_hits(round_number, rolls)
+    end
+    count_values_higher_than(rolls, hit_needed(round_number, defender))
+  end
+
+  def roll_wounds(round_number, hits, defender)
+    rolls = ComputeWounds.compute(hits, wound_needed(round_number, defender), wound_reroll_values(round_number, wound_needed(round_number, defender)))
+    equipment.each do |item|
+      rolls = item.roll_wounds(round_number, rolls)
+    end
+    count_values_higher_than(rolls, wound_needed(round_number, defender))
+  end
+
   def wound_needed(round_number, defender)
     roll_needed = ComputeWoundNeeded.wound_needed(stats(round_number).strength, defender.toughness)
     equipment.each do |item|
@@ -65,7 +81,8 @@ class Unit < Struct.new(:model, :size, :width, :equipment)
     save_modifier = attacker_strength > 3 ? attacker_strength - 3 : 0
     roll_needed = armor_save + save_modifier
 
-    caused_wounds - roll_dice(caused_wounds, roll_needed)
+    caused_wounds -= count_values_higher_than(roll_dice(caused_wounds), roll_needed)
+    caused_wounds - count_values_higher_than(roll_dice(caused_wounds), ward_save)
   end
 
   def hit_reroll_values(round_number, hit_needed)
