@@ -31,7 +31,7 @@ class Trial
         raise Exception.new("Bad result")
       end
     end
-    TrialResult.new(rounds.last.outcome, rounds)
+    TrialResult.new(rounds.last.outcome, rounds, attacking_unit.size, defending_unit.size)
   end
 end
 

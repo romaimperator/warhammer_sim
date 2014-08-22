@@ -50,7 +50,7 @@ class Simulation
   end
 
   def attacker_wounds_each_round
-    @trial_results.map(&:wounds_caused_by_attacker_each_round)
+    @trial_results.map(&:unsaved_wounds_caused_by_attacker_each_round)
   end
 
   def defender_wounds_each_round
@@ -67,7 +67,8 @@ class Simulation
   end
 
   def print_results
-    print_distribution_results("Round", "Rounds", @trial_results.map(&:number_of_rounds))
+    print_distribution_results("Simulation Statistics", [["Rounds", @trial_results.map(&:number_of_rounds)]])
+
     puts
     puts "Battle Statistics:"
     [
@@ -78,18 +79,26 @@ class Simulation
       ["Both Dead:", both_dead],
       ["Favorable for attacker:", attacker_wins + defender_flee],
       ["Favorable for defender:", defender_wins + attacker_flee],
-    ].each { |line| puts line[0].rjust(24) + " " + "#{line[1]}".rjust(5) + " " + "#{line[1].to_f / @number_of_trials}".rjust(7) }
-    puts
-    print_distribution_results("Attacker", "Wounds", attacker_wounds)
-    puts
-    print_distribution_results("Defender", "Wounds", defender_wounds)
-    puts
-    print_distribution_results("Attacker first round", "Wounds", attacker_wounds_each_round.map { |v| v[0] })
-    puts
-    print_distribution_results("Defender first round", "Wounds", defender_wounds_each_round.map { |v| v[0] })
+    ].each { |line| puts line[0].rjust(24) + " " + "#{line[1]}".rjust(5) + " " + "#{(line[1].to_f / @number_of_trials * 100).round(2)}%".rjust(7) }
 
-    #aw = attacker_wounds_each_round.flatten.group_by { |i| i }.map { |k,v| [k, v.size] }.sort_by { |i| i[0] }
-    #dw = defender_wounds_each_round.flatten.group_by { |i| i }.map { |k,v| [k, v.size] }.sort_by { |i| i[0] }
+    puts
+    print_distribution_results("Attacker", [
+      ["Trial Wounds", attacker_wounds],
+      ["First Round Hits", @trial_results.map(&:hits_caused_by_attacker_each_round).map { |v| v[0] }],
+      ["First Round Wounds", @trial_results.map(&:wounds_caused_by_attacker_each_round).map { |v| v[0] }],
+      ["First Round Unsaved", attacker_wounds_each_round.map {|v| v[0] }],
+      ["Survivor Models", @trial_results.map(&:attacker_survivors)],
+    ])
+
+    puts
+    print_distribution_results("Defender", [
+      ["Trial Wounds", defender_wounds],
+      ["First Round Hits", @trial_results.map(&:hits_caused_by_defender_each_round).map { |v| v[0] }],
+      ["First Round Wounds", @trial_results.map(&:wounds_caused_by_defender_each_round).map { |v| v[0] }],
+      ["First Round Unsaved", defender_wounds_each_round.map {|v| v[0] }],
+      ["Survivor Models", @trial_results.map(&:defender_survivors)],
+    ])
+
     require 'gnuplot'
     Gnuplot.open do |gp|
       Gnuplot::Plot.new( gp ) do |plot|
@@ -192,16 +201,27 @@ class Simulation
     ]
   end
 
-  def print_distribution_results(name, measurment_name, dist)
+  def print_distribution_results(name, columns)
+    max_label_length = [columns.max_by { |col| col[0].length }[0].length, 13].max
     puts "#{name} Statistics:"
     [
-      ["Average #{measurment_name}:", mean(dist)],
-      ["Max #{measurment_name}:", dist.max],
-      ["Min #{measurment_name}:", dist.min],
-      ["Std. Dev.:", standard_deviation(dist, mean(dist))],
-    ].each { |line| puts line[0].rjust(15) + " " + "#{line[1].round(3)}".rjust(7) }
-    puts "68.2% Range:".rjust(15) + " " + "#{(mean(dist) - standard_deviation(dist, mean(dist))).round(3)} - #{(mean(dist) + standard_deviation(dist, mean(dist))).round(3)}"
-    puts "95% Range:".rjust(15) + " " + "#{(mean(dist) - 2 * standard_deviation(dist, mean(dist))).round(3)} - #{(mean(dist) + 2 * standard_deviation(dist, mean(dist))).round(3)}"
+      ["", columns.map { |col| col[0] }],
+      ["", ["-" * max_label_length] * columns.size],
+      ["Max:", columns.map { |col| col[1].max.round(3) }],
+      ["Average:", columns.map { |col| mean(col[1]).round(3) }],
+      ["Min:", columns.map { |col| col[1].min.round(3) }],
+      ["Std. Dev.:", columns.map { |col| standard_deviation(col[1], mean(col[1])).round(3) }],
+      ["68.2% Range:", columns.map do |col|
+        col_mean = mean(col[1]).round(3)
+        std_dev = standard_deviation(col[1], col_mean).round(3)
+        "#{(col_mean - std_dev).round(3)} - #{(col_mean + std_dev).round(3)}"
+      end],
+      ["95% Range:", columns.map do |col|
+        col_mean = mean(col[1])
+        std_dev = standard_deviation(col[1], col_mean)
+        "#{(col_mean - 2 * std_dev).round(3)} - #{(col_mean + 2 * std_dev).round(3)}"
+      end],
+    ].each { |line| puts line[0].rjust(15) + " " + line[1].map { |val| val.to_s.rjust(max_label_length + 1) }.join(" |") }
   end
 end
 

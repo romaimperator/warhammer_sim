@@ -116,7 +116,7 @@ class Unit < Struct.new(:model, :size, :width, :equipment)
   end
 
   def take_wounds(unsaved_wounds)
-    self.size -= unsaved_wounds
+    self.size = [self.size - unsaved_wounds, 0].max
   end
 
   def method_missing(name, *args)
@@ -145,6 +145,22 @@ class Unit < Struct.new(:model, :size, :width, :equipment)
 
   def wounds_caused=(new_value)
     @wounds_caused = new_value
+  end
+
+  def hits
+    @hits||= 0
+  end
+
+  def hits=(new_value)
+    @hits= new_value
+  end
+
+  def unsaved_wounds
+    @unsaved_wounds ||= 0
+  end
+
+  def unsaved_wounds=(new_value)
+    @unsaved_wounds = new_value
   end
 
   def overkill

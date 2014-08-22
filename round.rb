@@ -37,8 +37,8 @@ class Round
 
     RoundResult.new(
       outcome,
-      RoundStats.new(attacker_attacks, attacker.wounds_caused),
-      RoundStats.new(defender_attacks, defender.wounds_caused)
+      RoundStats.new(attacker_attacks, attacker.hits, attacker.wounds_caused, attacker.unsaved_wounds),
+      RoundStats.new(defender_attacks, defender.hits, defender.wounds_caused, defender.unsaved_wounds)
     )
   end
 
