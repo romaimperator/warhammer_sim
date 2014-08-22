@@ -52,6 +52,7 @@ class Round
     if res_difference > 0
       if defender.roll_break_test(res_difference, attacker.number_of_ranks)
         if attacker.roll_pursuit >= defender.roll_flee
+          defender.take_wounds(defender.size)
           ATTACKER_WIN
         else
           DEFENDER_FLEE
@@ -64,6 +65,7 @@ class Round
     else
       if attacker.roll_break_test(-res_difference, defender.number_of_ranks)
         if defender.roll_pursuit >= attacker.roll_flee
+          attacker.take_wounds(attacker.size)
           DEFENDER_WIN
         else
           ATTACKER_FLEE
