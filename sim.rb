@@ -4,6 +4,7 @@ require_relative 'die_roller'
 require_relative 'constants'
 require_relative 'trial'
 require_relative 'round'
+require_relative 'part'
 require_relative 'model'
 require_relative 'unit'
 require_relative 'simulation'
@@ -23,16 +24,16 @@ def main
     Trial.new do
       [
         Unit.new(
-          Model.new("witch elves", 3, 3, 3, 1, 3, 4, 7, 7, 5, 20, 20), 20, 5, [
+          Model.new("witch elves", [Part.new("elf", 4, 3, 3, 1, 5, 3, 7, 7, 7, [])], 20, 20), 20, 5, [
             PoisonAttacks.new,
             RerollMisses.new,
-            RerollWounds.new,
+            #RerollWounds.new,
             MurderousProwess.new,
           ]
         ),
         Unit.new(
-          Model.new("halberd", 3, 3, 3, 1, 3, 1, 7, 6, 7, 20, 20), 40, 10, [
-            Halberd.new,
+          Model.new("halberd", [Part.new("man", 3, 3, 3, 1, 3, 1, 7, 6, 7, [])], 20, 20), 40, 10, [
+            #Halberd.new,
           ]
         )
       ]
