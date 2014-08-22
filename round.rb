@@ -10,8 +10,8 @@ class Round
   end
 
   def simulate(attacker, defender)
-    attacker_attacks = attacker.attacks(@number, defender)
-    defender_attacks = defender.attacks(@number, attacker)
+    attacker_attacks = AttackMatchup.new(@number, attacker, defender).number_of_attacks
+    defender_attacks = AttackMatchup.new(@number, defender, attacker).number_of_attacks
     if attacker.initiative > defender.initiative || attacker.strike_first?
       defender.take_wounds(attack(attacker, defender))
       attacker.take_wounds(attack(defender, attacker))

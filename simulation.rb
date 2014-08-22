@@ -54,7 +54,7 @@ class Simulation
   end
 
   def defender_wounds_each_round
-    @trial_results.map(&:wounds_caused_by_defender_each_round)
+    @trial_results.map(&:unsaved_wounds_caused_by_defender_each_round)
   end
 
   def standard_deviation(dist, mean)
