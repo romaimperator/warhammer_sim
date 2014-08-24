@@ -56,5 +56,9 @@ class Equipment
   def roll_wounds(round_number, rolls)
     rolls
   end
+
+  def initiative(round_number, current_initiative, defender)
+    current_initiative
+  end
 end
 

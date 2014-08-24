@@ -9,20 +9,31 @@ class Round
     @number = number
   end
 
+  def build_matchups(attacker, defender)
+    attacker_parts = attacker.parts.map { |part| AttackMatchup.new(@number, attacker, defender) }
+    defender_parts = defender.parts.map { |part| AttackMatchup.new(@number, defender, attacker) }
+    attacker_parts = attacker_parts.group_by do |matchup|
+      initiative = attacker.initiative
+      attacker.for_each_item { |item| initiative = item.initiative(@number, initiative, defender) }
+      initiative
+    end
+    defender_parts = defender_parts.group_by do |matchup|
+      initiative = defender.initiative
+      defender.for_each_item { |item| initiative = item.initiative(@number, initiative, attacker) }
+      initiative
+    end
+    attacker_parts.merge(defender_parts) { |initiative, attacker_part, defender_part| attacker_part + defender_part }
+  end
+
   def simulate(attacker, defender)
-    attacker_attacks = AttackMatchup.new(@number, attacker, defender).number_of_attacks
-    defender_attacks = AttackMatchup.new(@number, defender, attacker).number_of_attacks
-    if attacker.initiative > defender.initiative || attacker.strike_first?
-      defender.take_wounds(attack(attacker, defender))
-      attacker.take_wounds(attack(defender, attacker))
-    elsif defender.initiative > attacker.initiative || defender.strike_first?
-      attacker.take_wounds(attack(defender, attacker))
-      defender.take_wounds(attack(attacker, defender))
-    else
-      attacker_caused_wounds = attack(attacker, defender)
-      defender_caused_wounds = attack(defender, attacker)
-      attacker.take_wounds(defender_caused_wounds)
-      defender.take_wounds(attacker_caused_wounds)
+    attacker_attacks = nil#AttackMatchup.new(@number, attacker, defender).number_of_attacks
+    defender_attacks = nil#AttackMatchup.new(@number, defender, attacker).number_of_attacks
+    build_matchups(attacker, defender).to_a.each do |initiative_matchups|
+      initiative = initiative_matchups[0]
+      matchups = initiative_matchups[1]
+      matchups.map do |matchup|
+        [matchup, matchup.attack]
+      end.each { |matchup| matchup[0].defender.take_wounds(matchup[1]) }
     end
 
     outcome = if attacker.dead? && defender.dead?

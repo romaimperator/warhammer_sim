@@ -1,4 +1,6 @@
 class AttackMatchup
+  attr_reader :attacker, :defender
+
   def initialize(round_number, attacker, defender)
     @round_number = round_number
     @attacker = attacker
