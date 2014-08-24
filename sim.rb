@@ -16,13 +16,12 @@ require_relative 'equipment/reroll_wounds'
 require_relative 'equipment/murderous_prowess'
 require_relative 'equipment/poison_attacks'
 
-NUMBER_OF_TRIALS = 10000
+NUMBER_OF_TRIALS = 10_000
 
 def main
   simulator = Simulation.new(
     NUMBER_OF_TRIALS,
-    Trial.new do
-      [
+    Trial.new do [
         Unit.new(
           Model.new("witch elves", [
             Part.new("elf", 4, 3, 3, 1, 5, 3, 7, 7, 7, [])
@@ -36,7 +35,6 @@ def main
         Unit.new(
           Model.new("halberd", [
             Part.new("man", 3, 3, 3, 1, 3, 1, 7, 6, 7, []),
-            #Part.new("horse", 3, 3, 3, 1, 3, 1, 7, 7, 7, [])
           ], 20, 20), 40, 10, [
             #Halberd.new,
           ]
