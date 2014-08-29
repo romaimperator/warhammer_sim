@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ -n "$1" ]; then
+    rspec --color $1
+else
+    rspec --color --format progress --require "~/lib/vim_rspec_formatter" --format VimFormatter spec
+fi
+
