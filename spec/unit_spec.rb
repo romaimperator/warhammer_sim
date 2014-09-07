@@ -1,65 +1,12 @@
 require File.expand_path(File.dirname(__FILE__) + "/../unit")
-
-class UnitFactory
-  attr_accessor :model,
-                :special_models,
-                :size,
-                :width,
-                :offset,
-                :equipment
-
-  def initialize(model_double)
-    @model = model_double
-    @special_models = []
-    @size = 10
-    @width = 5
-    @offset = 0
-    @equipment = []
-  end
-
-  def build
-    Unit.new(@model, @special_models, @size, @width, @offset, @equipment)
-  end
-
-  def model(model)
-    @model = model
-    self
-  end
-
-  def special_models(special_models)
-    @special_models = special_models
-    self
-  end
-
-  def size(size)
-    @size = size
-    self
-  end
-
-  def width(width)
-    @width = width
-    self
-  end
-
-  def offset(offset)
-    @offset = offset
-    self
-  end
-
-  def equipment(equipment)
-    @equipment = equipment
-    self
-  end
-end
+require "factories/unit_factory"
 
 describe Unit do
-  subject { UnitFactory.new(double(:model,
-                                   :mm_width => 20,
-                                   :mm_length => 20,
-                                   :name => "halberdier")) }
+  subject { UnitFactory.new }
 
   describe "#check_break_test" do
-    let(:model) { double(:model, :leadership => 7) }
+    let(:model) { ModelFactory.new.parts([PartFactory.new.leadership(7).build])
+                    .build }
     let(:unit) { subject.model(model).size(20).build }
 
     it "returns true if the test is passed" do
@@ -105,7 +52,7 @@ describe Unit do
 
   describe "#farthest_back_special_model_occupied_space" do
     let(:special_models) do
-      { [1, 5] => double(:special_models, :mm_width => 40, :mm_length => 40) }
+      { [1, 5] => ModelFactory.new.mm_width(40).mm_length(40).build }
     end
 
     it "returns the rank of the farthest back special model space" do
@@ -126,7 +73,7 @@ describe Unit do
     end
 
     it "returns true if special models fill in the missing regular models" do
-      special_models = { [1, 5] => double(:special_models, :mm_width => 40) }
+      special_models = { [1, 5] => ModelFactory.new.mm_width(40).build }
       unit = subject.width(10).size(8).special_models(special_models).build
       expect(unit.is_horde?).to be_true
     end
@@ -172,7 +119,7 @@ describe Unit do
 
   describe "#model_count" do
     it "returns the number of models in the unit including special models" do
-      special_models = { [1, 5] => double(:special_models, :mm_width => 40) }
+      special_models = { [1, 5] => ModelFactory.new.mm_width(40).build }
       unit = subject.size(20).special_models(special_models).build
       expect(unit.model_count).to eq(21)
     end
@@ -180,10 +127,8 @@ describe Unit do
 
   describe "#models_in_mm_range" do
     let(:special_models) do
-      { [1, 5] => double(:special_model,
-                         :mm_width => 40,
-                         :mm_length => 40,
-                         :name => "champion") }
+      { [1, 5] => ModelFactory.new.name("champion").mm_width(40).mm_length(40)
+                    .build }
     end
     let(:unit) do
       subject.special_models(special_models).build
@@ -216,9 +161,8 @@ describe Unit do
 
   describe "#number_of_ranks" do
     it "returns the number of ranks whether full or not" do
-      special_models = { [1, 5] => double(:special_models,
-                                          :mm_width => 40,
-                                          :mm_length => 100) }
+      special_models = { [1, 5] => ModelFactory.new.mm_width(40).mm_length(100)
+                                     .build }
       unit = subject.size(10).special_models(special_models).build
       expect(unit.number_of_ranks).to eq(5)
     end
@@ -231,9 +175,8 @@ describe Unit do
 
   describe "#positions_occupied" do
     it "returns the number of unit positions that are occupied" do
-      special_models = { [1, 5] => double(:special_models,
-                                          :mm_width => 40,
-                                          :mm_length => 40) }
+      special_models = { [1, 5] => ModelFactory.new.mm_width(40).mm_length(40)
+                                     .build }
       unit = subject.size(20).special_models(special_models).build
       expect(unit.positions_occupied).to eq(24)
     end
@@ -246,9 +189,8 @@ describe Unit do
     end
 
     it "returns the rank bonus when there are special models" do
-      special_models = { [1, 2] => double(:special_models,
-                                          :mm_width => 40,
-                                          :mm_length => 40) }
+      special_models = { [1, 2] => ModelFactory.new.mm_width(40).mm_length(40)
+                                     .build }
       unit = subject.size(11).width(5).special_models(special_models).build
       expect(unit.rank_bonus).to eq(2)
     end
@@ -263,7 +205,7 @@ describe Unit do
 
   describe "#special_model_occupied_spaces_in_rank" do
     let(:special_models) do
-      { [1, 2] => double(:special_models, :mm_width => 40, :mm_length => 40) }
+      { [1, 2] => ModelFactory.new.mm_width(40).mm_length(40).build }
     end
     let(:unit) { subject.size(40).special_models(special_models).build }
 
@@ -285,9 +227,9 @@ describe Unit do
   end
 
  #describe "#model_in_position" do
- #  let(:model) { double(:model, :mm_width => 20, :mm_length => 20) }
+  #  let(:model) { ModelFactory.new.mm_width(20).mm_length(20).build }
  #  let(:special_models) do
- #    { [1, 5] => double(:character, :mm_width => 20, :mm_length => 20) }
+  #    { [1, 5] => ModelFactory.new.mm_width(20).mm_length(20).build 20) }
  #  end
  #  let(:unit) do
  #    UnitFactory.new.model(model).special_models(special_models).build
