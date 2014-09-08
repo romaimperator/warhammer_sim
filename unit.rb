@@ -99,6 +99,12 @@ class Unit < Struct.new(:model, :special_models, :size, :width, :offset, :equipm
     number_of_ranks > defender_ranks
   end
 
+  def item_manipulation(method_name, starting_value, *args)
+    result = starting_value
+    for_each_item { |item| result = item.send(method_name, *args) }
+    result
+  end
+
   def left_flank_location
     0
   end
@@ -198,6 +204,10 @@ class Unit < Struct.new(:model, :special_models, :size, :width, :offset, :equipm
         sum
       end
     end
+  end
+
+  def stats(round_number)
+    item_manipulation(:stats, model.dup, round_number)
   end
 
   def take_wounds(unsaved_wounds)

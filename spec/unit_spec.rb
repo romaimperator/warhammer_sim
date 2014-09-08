@@ -103,6 +103,25 @@ describe Unit do
     end
   end
 
+  describe "#item_manipulation" do
+    let(:unit) { subject.build }
+
+    it "defaults to the starting value" do
+      starting_value = 50
+      expect(unit.item_manipulation(nil, starting_value)).to eq(starting_value)
+    end
+
+    it "calls the method for each item" do
+      starting_value = 0
+      args = [1, 2, 3]
+      item = Equipment.new
+      item.should_receive(:test_method).with(*args).and_return(starting_value)
+      unit = subject.equipment([item]).build
+      expect(unit.item_manipulation(:test_method, starting_value,
+                                    *args)).to eq(starting_value)
+    end
+  end
+
   describe "#left_flank_location" do
     it "is defined as zero" do
       unit = subject.build
@@ -223,6 +242,16 @@ describe Unit do
 
     it "returns 0 spaces for the fourth rank" do
       expect(unit.special_model_occupied_spaces_in_rank(4)).to eq(0)
+    end
+  end
+
+  describe "#stats" do
+    it "delegates to the item caller method" do
+      round_number = 1
+      unit = subject.build
+      unit.should_receive(:item_manipulation).with(:stats, unit.model,
+                                                   round_number)
+      unit.stats(round_number)
     end
   end
 

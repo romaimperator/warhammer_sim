@@ -12,14 +12,6 @@ class AttackMatchup
     compute_wounds
   end
 
-  def attacker_stats
-    total_stats = @attacker.model.dup
-    @attacker.for_each_item do |item|
-      total_stats = item.stats(@round_number, total_stats)
-    end
-    total_stats
-  end
-
   def compute_wounds
     hits = roll_hits
     wounds = roll_wounds(hits)
@@ -27,14 +19,6 @@ class AttackMatchup
     @attacker.hits = hits
     @attacker.wounds_caused = wounds
     @attacker.unsaved_wounds = unsaved_wounds
-  end
-
-  def defender_stats
-    total_stats = @defender.model.dup
-    @defender.for_each_item do |item|
-      total_stats = item.stats(@round_number, total_stats)
-    end
-    total_stats
   end
 
   def hit_reroll_values
@@ -54,14 +38,14 @@ class AttackMatchup
   end
 
   def roll_armor_save(caused_wounds)
-    save_modifier = attacker_stats.strength > 3 ? attacker_stats.strength - 3 : 0
-    roll_needed = defender_stats.armor_save + save_modifier
+    save_modifier = @attacker.stats.strength > 3 ? @attacker.stats.strength - 3 : 0
+    roll_needed = @defender.stats.armor_save + save_modifier
 
     caused_wounds - count_values_higher_than(roll_dice(caused_wounds), roll_needed)
   end
 
   def roll_extra_save(caused_wounds)
-    caused_wounds - count_values_higher_than(roll_dice(caused_wounds), defender_stats.ward_save)
+    caused_wounds - count_values_higher_than(roll_dice(caused_wounds), @defender.stats.ward_save)
   end
 
   def roll_hits
@@ -85,7 +69,7 @@ class AttackMatchup
   end
 
   def to_hit_number
-    roll_needed = ComputeHitNeeded.hit_needed(attacker_stats.weapon_skill, defender_stats.weapon_skill)
+    roll_needed = ComputeHitNeeded.hit_needed(@attacker.stats.weapon_skill, @defender.stats.weapon_skill)
     @attacker.for_each_item do |item|
       roll_needed = item.hit_needed(@round_number, roll_needed)
     end
@@ -93,7 +77,7 @@ class AttackMatchup
   end
 
   def to_wound_number
-    roll_needed = ComputeWoundNeeded.wound_needed(attacker_stats.strength, defender_stats.toughness)
+    roll_needed = ComputeWoundNeeded.wound_needed(@attacker.stats.strength, @defender.stats.toughness)
     @attacker.for_each_item do |item|
       roll_needed = item.wound_needed(@round_number, roll_needed)
     end
