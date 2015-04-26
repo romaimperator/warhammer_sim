@@ -21,35 +21,19 @@ class AttackMatchup
     @attacker.unsaved_wounds = unsaved_wounds
   end
 
-  def hit_reroll_values
-    values = []
-    @attacker.for_each_item do |item|
-      values += item.hit_reroll_values(@round_number, to_hit_number)
-    end
-    values.uniq
-  end
-
-  def number_of_attacks
-    total_attacks = @attacker.base_attacks(@defender)
-    @attacker.for_each_item do |item|
-      total_attacks = item.attacks(@round_number, total_attacks, @attacker)
-    end
-    total_attacks
-  end
-
   def roll_armor_save(caused_wounds)
-    save_modifier = @attacker.stats.strength > 3 ? @attacker.stats.strength - 3 : 0
-    roll_needed = @defender.stats.armor_save + save_modifier
+    save_modifier = @attacker.strength(@round_number) > 3 ? @attacker.strength(@round_number) - 3 : 0
+    roll_needed = @defender.stats(@round_number).armor_save + save_modifier
 
     caused_wounds - count_values_higher_than(roll_dice(caused_wounds), roll_needed)
   end
 
   def roll_extra_save(caused_wounds)
-    caused_wounds - count_values_higher_than(roll_dice(caused_wounds), @defender.stats.ward_save)
+    caused_wounds - count_values_higher_than(roll_dice(caused_wounds), @defender.stats(@round_number).ward_save)
   end
 
   def roll_hits
-    rolls = ComputeHits.compute(number_of_attacks, to_hit_number, hit_reroll_values)
+    rolls = ComputeHits.compute(@attacker.number_of_attacks(@round_number, @defender), to_hit_number, @attacker.hit_reroll_values(@round_number, to_hit_number))
     @attacker.for_each_item do |item|
       rolls = item.roll_hits(@round_number, rolls)
     end
@@ -61,7 +45,7 @@ class AttackMatchup
   end
 
   def roll_wounds(hits)
-    rolls = ComputeWounds.compute(hits, to_wound_number, wound_reroll_values)
+    rolls = ComputeWounds.compute(hits, to_wound_number, @attacker.wound_reroll_values(@round_number, to_wound_number))
     @attacker.for_each_item do |item|
       rolls = item.roll_wounds(@round_number, rolls)
     end
@@ -69,7 +53,7 @@ class AttackMatchup
   end
 
   def to_hit_number
-    roll_needed = ComputeHitNeeded.hit_needed(@attacker.stats.weapon_skill, @defender.stats.weapon_skill)
+    roll_needed = ComputeHitNeeded.hit_needed(@attacker.stats(@round_number).weapon_skill, @defender.stats(@round_number).weapon_skill)
     @attacker.for_each_item do |item|
       roll_needed = item.hit_needed(@round_number, roll_needed)
     end
@@ -77,19 +61,11 @@ class AttackMatchup
   end
 
   def to_wound_number
-    roll_needed = ComputeWoundNeeded.wound_needed(@attacker.stats.strength, @defender.stats.toughness)
+    roll_needed = ComputeWoundNeeded.wound_needed(@attacker.strength(@round_number), @defender.stats(@round_number).toughness)
     @attacker.for_each_item do |item|
       roll_needed = item.wound_needed(@round_number, roll_needed)
     end
     roll_needed
-  end
-
-  def wound_reroll_values
-    values = []
-    @attacker.for_each_item do |item|
-      values += item.wound_reroll_values(@round_number, to_wound_number)
-    end
-    values.uniq
   end
 end
 

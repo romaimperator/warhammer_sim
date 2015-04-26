@@ -5,7 +5,7 @@ class Simulation
   end
 
   def simulate
-    @trial_results = (1..@number_of_trials).map do |round_number|
+    @trial_results = (1..@number_of_trials).map do |trial_number|
       @trial_runner.simulate
     end
   end
@@ -79,7 +79,8 @@ class Simulation
       ["Both Dead:", both_dead],
       ["Favorable for attacker:", attacker_wins + defender_flee],
       ["Favorable for defender:", defender_wins + attacker_flee],
-    ].each { |line| puts line[0].rjust(24) + " " + "#{line[1]}".rjust(5) + " " + "#{(line[1].to_f / @number_of_trials * 100).round(2)}%".rjust(7) }
+    #].each { |line| puts line[0].rjust(24) + " " + "#{line[1]}".rjust(5) + " " + "#{(line[1].to_f / @number_of_trials * 100).round(2)}%".rjust(7) }
+    ].each { |line| puts "%24s %5d %7.2f%%" % [line[0], line[1], (line[1].to_f / @number_of_trials * 100)] }
 
     puts
     print_distribution_results("Attacker", [

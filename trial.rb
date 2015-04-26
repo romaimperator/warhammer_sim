@@ -12,7 +12,7 @@ class Trial
     fighting = true
     rounds = []
     while fighting
-      result = Round.new(rounds.size + 1).simulate(attacking_unit, defending_unit)
+      result = Round.new(rounds.size + 1, attacking_unit, defending_unit).simulate
       rounds << result
       if result.outcome == ATTACKER_WIN
         fighting = false
@@ -28,7 +28,7 @@ class Trial
       elsif result.outcome == DEFENDER_HOLD
       elsif result.outcome == TIE
       else
-        raise Exception.new("Bad result")
+        raise Exception.new("Bad result: #{result}")
       end
     end
     TrialResult.new(rounds.last.outcome, rounds, attacking_unit.size, defending_unit.size)

@@ -15,36 +15,81 @@ require_relative 'equipment/reroll_misses'
 require_relative 'equipment/reroll_wounds'
 require_relative 'equipment/murderous_prowess'
 require_relative 'equipment/poison_attacks'
+require_relative 'equipment/extra_hand_weapon'
 
 NUMBER_OF_TRIALS = 10_000
 
 def main
-  simulator = Simulation.new(
-    NUMBER_OF_TRIALS,
-    Trial.new do [
-        Unit.new(
+    u = Unit.new(
+          Model.new("halberd", [
+            Part.new("man", 3, 3, 3, 1, 3, 1, 7, 6, 7, []),
+          ], 20, 20, []), {
+            [1, 5] => Model.new("champion", [
+              Part.new("man", 3, 3, 3, 1, 3, 2, 7, 6, 7, []),
+            ], 20, 20, []),
+          },
+          40,
+          10,
+          -40, [
+            Halberd.new,
+          ]
+        )
+    s = Unit.new(
+          Model.new("sword", [
+            Part.new("man", 4, 3, 3, 1, 3, 1, 7, 5, 6, []),
+          ], 20, 20, []), {
+            [1, 5] => Model.new("champion", [
+              Part.new("man", 4, 3, 3, 1, 3, 2, 7, 5, 6, []),
+            ], 20, 20, []),
+          },
+          40,
+          10,
+          -40, [
+            #Halberd.new,
+          ]
+    )
+    b = Unit.new(
           Model.new("witch elves", [
-            Part.new("elf", 4, 3, 3, 1, 5, 3, 7, 7, 7, [])
-          ], 20, 20), 20, 5, [
+            Part.new("elf", 4, 3, 3, 1, 5, 2, 7, 7, 7, [])
+          ], 20, 20, []), {}, 20, 5, 60, [
+            ExtraHandWeapon.new,
             PoisonAttacks.new,
-            RerollMisses.new,
+            #RerollMisses.new,
             #RerollWounds.new,
             MurderousProwess.new,
           ]
-        ),
-        Unit.new(
-          Model.new("halberd", [
-            Part.new("man", 3, 3, 3, 1, 3, 1, 7, 6, 7, []),
-          ], 20, 20), 40, 10, [
-            #Halberd.new,
-          ]
         )
+
+  simulator = Simulation.new(
+    NUMBER_OF_TRIALS,
+    Trial.new do [
+        Marshal.load(Marshal.dump(b)),
+        Marshal.load(Marshal.dump(u))
       ]
     end
   )
 
+  puts u.draw
+  puts b.draw
+  puts u.size
+
+  puts u.number_of_ranks
+  puts u.rank_bonus
+  puts u.positions_occupied
+  puts b.positions_occupied
+  puts compute_offset(b, u)
+  puts compute_offset(u, b)
+  p u.models_in_mm_range(u.convert_coordinate(60), u.convert_coordinate(160))
+  p u.find_targets(b)[0]
+  #exit
+
   simulator.simulate
   simulator.print_results
+end
+
+def compute_offset(unit_with_offset, unit_needing_offset)
+  unit_with_offset.mm_width + unit_with_offset.offset -
+    unit_needing_offset.mm_width
 end
 
 main

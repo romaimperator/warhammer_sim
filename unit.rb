@@ -8,12 +8,38 @@ class Unit < Struct.new(:model, :special_models, :size, :width, :offset, :equipm
   attr_accessor :hits
   attr_accessor :unsaved_wounds
   attr_accessor :wounds_caused
+  attr_accessor :round_number
 
   def initialize(*args, &block)
     super
     @hits = 0
     @unsaved_wounds = 0
     @wounds_caused = 0
+    @manipulations_store = {}
+    model.add_equipment(equipment)
+    model.unit = self
+    special_models.each do |position, model|
+      model.add_equipment(equipment)
+      model.unit = self
+    end
+  end
+
+  def get_all_parts
+    model.parts + special_models.values.reduce([]) { |part_array, special_model| part_array += special_model.parts }
+  end
+
+  def get_matchups(target_unit)
+    ranks_that_can_attack = is_horde? ? 3 : 2
+    (1..ranks_that_can_attack).map do |rank_number|
+      (1..width).map do |file|
+        possible_targets = find_targets_for_position(target_unit, rank_number, file)
+        current_model = model_in_position(rank_number, file)
+        current_model.parts.map do |part|
+          selected_target = possible_targets[0] # Put strategy for selecting targets here
+          AttackMatchup.new(round_number, part, selected_target)
+        end
+      end
+    end.flatten.flatten.flatten
   end
 
   def banner
@@ -25,7 +51,7 @@ class Unit < Struct.new(:model, :special_models, :size, :width, :offset, :equipm
   end
 
   def check_break_test(roll, modifier)
-    check_leadership_test(roll, modifier) || roll == INSANE_COURAGE_ROLL
+    roll == INSANE_COURAGE_ROLL || !check_leadership_test(roll, modifier)
   end
 
   def check_leadership_test(roll, modifier)
@@ -54,15 +80,7 @@ class Unit < Struct.new(:model, :special_models, :size, :width, :offset, :equipm
     rank_targets =
       (1..number_of_ranks).map do |rank|
         (1..width).map do |file|
-          model_to_check = model_in_position(rank, file)
-          if !model_to_check.nil?
-            target_unit.models_in_mm_range(
-              target_unit.convert_coordinate(model.mm_width * (file - 1)),
-              target_unit.convert_coordinate(model.mm_width * file)
-            )
-          else
-            []
-          end
+          find_targets_for_position(target_unit, rank, file)
         end
       end
     rank_targets.map { |rank_positions|
@@ -80,6 +98,18 @@ class Unit < Struct.new(:model, :special_models, :size, :width, :offset, :equipm
     #}]
   end
 
+  def find_targets_for_position(target_unit, rank, file)
+    model_to_check = model_in_position(rank, file)
+    if !model_to_check.nil?
+      target_unit.models_in_mm_range(
+        target_unit.convert_coordinate(model.mm_width * (file - 1)),
+        target_unit.convert_coordinate(model.mm_width * file)
+      )
+    else
+      []
+    end
+  end
+
   def flank_or_rear
     0
   end
@@ -88,6 +118,16 @@ class Unit < Struct.new(:model, :special_models, :size, :width, :offset, :equipm
     equipment.each do |item|
       block.call(item)
     end
+  end
+
+  def has_special_model?(special_model)
+    special_models.include?(special_model)
+  end
+
+  def hit_reroll_values(round_number, to_hit_number)
+    reroll_values = item_manipulation(:hit_reroll_values, round_number, [],
+                                      to_hit_number)
+    reroll_values.uniq
   end
 
   def is_horde?
@@ -99,10 +139,16 @@ class Unit < Struct.new(:model, :special_models, :size, :width, :offset, :equipm
     number_of_ranks > defender_ranks
   end
 
-  def item_manipulation(method_name, starting_value, *args)
-    result = starting_value
-    for_each_item { |item| result = item.send(method_name, *args) }
-    result
+  def item_manipulation(method_name, round_number, starting_value, *args)
+    compute_value_block = Proc.new {
+      result = starting_value
+      for_each_item { |item| result = item.send(method_name, round_number, result, *args) }
+      result
+    }
+    if !@manipulations_store[method_name]
+      @manipulations_store[method_name] = {}
+    end
+    @manipulations_store[method_name][round_number] ||= compute_value_block.call
   end
 
   def left_flank_location
@@ -142,12 +188,26 @@ class Unit < Struct.new(:model, :special_models, :size, :width, :offset, :equipm
     #Hash[models.group_by { |model| model }.map { |key, value| [key, value.size] }]
   end
 
+  def number_of_attacks(round_number, defender)
+    item_manipulation(:attacks, round_number, width * stats(round_number).attacks, self)
+  end
+
   def number_of_ranks
     final_possible_rank = [positions_occupied / width +
                            (positions_occupied % width >= 1 ? 1 : 0),
                            farthest_back_special_model_occupied_space].max
 
     final_possible_rank
+  end
+
+  def notify_model_died(model_that_died)
+    if model_that_died == model
+      self.size = [self.size - 1, 0].max
+    elsif has_special_model?(model_that_died)
+      remove_special_model(model_that_died)
+    else
+      raise Exception.new("Model not found in unit")
+    end
   end
 
   def overkill
@@ -171,6 +231,10 @@ class Unit < Struct.new(:model, :special_models, :size, :width, :offset, :equipm
       remaining_regular_models -= (width - occupied_spaces)
     end
     [rank - 1, 3].min
+  end
+
+  def remove_special_model(model_to_remove)
+    special_models -= [model_to_remove]
   end
 
   def right_flank_location
@@ -207,11 +271,34 @@ class Unit < Struct.new(:model, :special_models, :size, :width, :offset, :equipm
   end
 
   def stats(round_number)
-    item_manipulation(:stats, model.dup, round_number)
+    item_manipulation(:stats, round_number, model)
+  end
+
+  def strength(round_number)
+    item_manipulation(:strength, round_number, stats(round_number).strength)
   end
 
   def take_wounds(unsaved_wounds)
     self.size = [self.size - unsaved_wounds, 0].max
+  end
+
+  def wound_reroll_values(round_number, to_wound_number)
+    reroll_values = item_manipulation(:wound_reroll_values, round_number, [],
+                                      to_wound_number)
+    reroll_values.uniq
+  end
+
+  def draw
+    (1..number_of_ranks).map do |rank|
+      (1..width).map do |file|
+        model_in_position(rank, file).draw
+      end.reduce(["", "", "", ""]) do |sum, drawn_model|
+        enum = drawn_model.each
+        sum.map do |row|
+          row + enum.next
+        end
+      end
+    end
   end
 
 private

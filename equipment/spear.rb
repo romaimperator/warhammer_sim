@@ -11,11 +11,12 @@ class FootSpear < Equipment
 end
 
 class MountedSpear < Equipment
-  def stats(round_number, current_stats)
+  def strength(round_number, current_strength)
     if round_number == 1
-      current_stats.strength += 1
+      current_strength + 1
+    else
+      current_strength
     end
-    current_stats
   end
 end
 
