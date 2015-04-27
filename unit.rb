@@ -5,10 +5,22 @@ class Unit < Struct.new(:model, :special_models, :size, :width, :offset, :equipm
   FIRST_RANK = 1
   INSANE_COURAGE_ROLL = 2
 
-  attr_accessor :hits
-  attr_accessor :unsaved_wounds
-  attr_accessor :wounds_caused
+  #attr_accessor :hits
+  #attr_accessor :unsaved_wounds
+  #attr_accessor :wounds_caused
   attr_accessor :round_number
+
+  def hits
+    model.hits + special_models.values.reduce(0) { |sum, special_model| sum + special_model.hits }
+  end
+
+  def unsaved_wounds
+    model.unsaved_wounds + special_models.values.reduce(0) { |sum, special_model| sum + special_model.unsaved_wounds }
+  end
+
+  def wounds_caused
+    model.wounds_caused + special_models.values.reduce(0) { |sum, special_model| sum + special_model.wounds_caused }
+  end
 
   def initialize(*args, &block)
     super
@@ -104,7 +116,7 @@ class Unit < Struct.new(:model, :special_models, :size, :width, :offset, :equipm
       target_unit.models_in_mm_range(
         target_unit.convert_coordinate(model.mm_width * (file - 1)),
         target_unit.convert_coordinate(model.mm_width * file)
-      )
+      ).map { |model| model.parts }.flatten
     else
       []
     end

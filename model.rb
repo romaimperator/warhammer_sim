@@ -1,6 +1,18 @@
 class Model < Struct.new(:name, :parts, :mm_width, :mm_length, :equipment)
   attr_accessor :unit
 
+  def hits
+    parts.reduce(0) { |sum, part| sum + part.hits }
+  end
+
+  def unsaved_wounds
+    parts.reduce(0) { |sum, part| sum + part.unsaved_wounds }
+  end
+
+  def wounds_caused
+    parts.reduce(0) { |sum, part| sum + part.wounds_caused }
+  end
+
   def initialize(*args, &block)
     super
     parts.each do |part|
@@ -54,7 +66,15 @@ class Model < Struct.new(:name, :parts, :mm_width, :mm_length, :equipment)
         unit.notify_model_died(self)
       end
     else
-      raise Exception.new("Part not part of this model")
+      raise Exception.new("Part #{part_that_died} not part of this model #{self}: #{parts}")
+    end
+  end
+
+  def take_wounds(wounds_caused)
+    if self == unit.model
+      unit.take_wounds(wounds_caused)
+    else
+      parts[0].take_wounds(wounds_caused)
     end
   end
 
@@ -69,7 +89,7 @@ class Model < Struct.new(:name, :parts, :mm_width, :mm_length, :equipment)
   end
 
   def remove_part(part_to_remove)
-    parts -= [part_to_remove]
+    self.parts -= [part_to_remove]
   end
 end
 

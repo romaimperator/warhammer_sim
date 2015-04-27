@@ -1,5 +1,8 @@
-class Part < Struct.new(:name, :_weapon_skill, :_strength, :_toughness, :_wounds, :_initiative, :_attacks, :_leadership, :_armor_save, :_ward_save, :equipment)
+Part = Struct.new(:name, :_weapon_skill, :_strength, :_toughness, :_wounds, :_initiative, :_attacks, :_leadership, :_armor_save, :_ward_save, :equipment) do
   attr_accessor :model
+  attr_accessor :hits
+  attr_accessor :wounds_caused
+  attr_accessor :unsaved_wounds
 
   def initialize(*args, &block)
     super
@@ -46,14 +49,30 @@ class Part < Struct.new(:name, :_weapon_skill, :_strength, :_toughness, :_wounds
     item_manipulation(:ward_save, _ward_save)
   end
 
+  def hit_reroll_values(to_hit_number)
+    reroll_values = item_manipulation(:hit_reroll_values, [], to_hit_number)
+    reroll_values.uniq
+  end
+
+  def wound_reroll_values(to_wound_number)
+    reroll_values = item_manipulation(:wound_reroll_values, [], to_wound_number)
+    reroll_values.uniq
+  end
+
   def dead?
     wounds <= 0
   end
 
   def take_wounds(wounds_caused)
-    _wounds -= wounds_caused
-    if dead?
-      model.notify_part_died(self)
+    return if dead?
+
+    if model == model.unit.model
+      model.unit.take_wounds(wounds_caused)
+    else
+      self._wounds -= wounds_caused
+      if dead?
+        model.notify_part_died(self)
+      end
     end
   end
 

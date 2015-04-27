@@ -17,7 +17,7 @@ require_relative 'equipment/murderous_prowess'
 require_relative 'equipment/poison_attacks'
 require_relative 'equipment/extra_hand_weapon'
 
-NUMBER_OF_TRIALS = 10_000
+NUMBER_OF_TRIALS = 100
 
 def main
     u = Unit.new(

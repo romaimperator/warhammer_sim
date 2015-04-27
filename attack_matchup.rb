@@ -22,19 +22,19 @@ class AttackMatchup
   end
 
   def roll_armor_save(caused_wounds)
-    save_modifier = @attacker.strength(@round_number) > 3 ? @attacker.strength(@round_number) - 3 : 0
-    roll_needed = @defender.stats(@round_number).armor_save + save_modifier
+    save_modifier = @attacker.strength > 3 ? @attacker.strength - 3 : 0
+    roll_needed = @defender.armor_save + save_modifier
 
     caused_wounds - count_values_higher_than(roll_dice(caused_wounds), roll_needed)
   end
 
   def roll_extra_save(caused_wounds)
-    caused_wounds - count_values_higher_than(roll_dice(caused_wounds), @defender.stats(@round_number).ward_save)
+    caused_wounds - count_values_higher_than(roll_dice(caused_wounds), @defender.ward_save)
   end
 
   def roll_hits
-    rolls = ComputeHits.compute(@attacker.number_of_attacks(@round_number, @defender), to_hit_number, @attacker.hit_reroll_values(@round_number, to_hit_number))
-    @attacker.for_each_item do |item|
+    rolls = ComputeHits.compute(@attacker.attacks, to_hit_number, @attacker.hit_reroll_values(to_hit_number))
+    @attacker.equipment.each do |item|
       rolls = item.roll_hits(@round_number, rolls)
     end
     count_values_higher_than(rolls, to_hit_number)
@@ -45,24 +45,24 @@ class AttackMatchup
   end
 
   def roll_wounds(hits)
-    rolls = ComputeWounds.compute(hits, to_wound_number, @attacker.wound_reroll_values(@round_number, to_wound_number))
-    @attacker.for_each_item do |item|
+    rolls = ComputeWounds.compute(hits, to_wound_number, @attacker.wound_reroll_values(to_wound_number))
+    @attacker.equipment.each do |item|
       rolls = item.roll_wounds(@round_number, rolls)
     end
     count_values_higher_than(rolls, to_wound_number)
   end
 
   def to_hit_number
-    roll_needed = ComputeHitNeeded.hit_needed(@attacker.stats(@round_number).weapon_skill, @defender.stats(@round_number).weapon_skill)
-    @attacker.for_each_item do |item|
+    roll_needed = ComputeHitNeeded.hit_needed(@attacker.weapon_skill, @defender.weapon_skill)
+    @attacker.equipment.each do |item|
       roll_needed = item.hit_needed(@round_number, roll_needed)
     end
     roll_needed
   end
 
   def to_wound_number
-    roll_needed = ComputeWoundNeeded.wound_needed(@attacker.strength(@round_number), @defender.stats(@round_number).toughness)
-    @attacker.for_each_item do |item|
+    roll_needed = ComputeWoundNeeded.wound_needed(@attacker.strength, @defender.toughness)
+    @attacker.equipment.each do |item|
       roll_needed = item.wound_needed(@round_number, roll_needed)
     end
     roll_needed
