@@ -1,3 +1,5 @@
+require_relative 'attack_matchup_result'
+
 class AttackMatchup
   attr_reader :attacker
   attr_reader :defender
@@ -16,9 +18,7 @@ class AttackMatchup
     hits = roll_hits
     wounds = roll_wounds(hits)
     unsaved_wounds = roll_saves(wounds)
-    @attacker.hits = hits
-    @attacker.wounds_caused = wounds
-    @attacker.unsaved_wounds = unsaved_wounds
+    AttackMatchupResult.new(@attacker.attacks, hits, wounds, unsaved_wounds)
   end
 
   def roll_armor_save(caused_wounds)

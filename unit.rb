@@ -5,22 +5,7 @@ class Unit < Struct.new(:model, :special_models, :size, :width, :offset, :equipm
   FIRST_RANK = 1
   INSANE_COURAGE_ROLL = 2
 
-  #attr_accessor :hits
-  #attr_accessor :unsaved_wounds
-  #attr_accessor :wounds_caused
   attr_accessor :round_number
-
-  def hits
-    model.hits + special_models.values.reduce(0) { |sum, special_model| sum + special_model.hits }
-  end
-
-  def unsaved_wounds
-    model.unsaved_wounds + special_models.values.reduce(0) { |sum, special_model| sum + special_model.unsaved_wounds }
-  end
-
-  def wounds_caused
-    model.wounds_caused + special_models.values.reduce(0) { |sum, special_model| sum + special_model.wounds_caused }
-  end
 
   def initialize(*args, &block)
     super
@@ -70,8 +55,8 @@ class Unit < Struct.new(:model, :special_models, :size, :width, :offset, :equipm
     roll <= model.leadership + modifier
   end
 
-  def combat_res_earned
-    rank_bonus + banner + wounds_caused + overkill + charge + flank_or_rear
+  def combat_res_earned(round_result)
+    rank_bonus + banner + round_result.wounds_caused + overkill + charge + flank_or_rear
   end
 
   def convert_coordinate(value)

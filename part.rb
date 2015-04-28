@@ -1,8 +1,5 @@
 Part = Struct.new(:name, :_weapon_skill, :_strength, :_toughness, :_wounds, :_initiative, :_attacks, :_leadership, :_armor_save, :_ward_save, :equipment) do
   attr_accessor :model
-  attr_accessor :hits
-  attr_accessor :wounds_caused
-  attr_accessor :unsaved_wounds
 
   def initialize(*args, &block)
     super

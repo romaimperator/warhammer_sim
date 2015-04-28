@@ -44,13 +44,26 @@ class Round
   def simulate
     attacker_attacks = nil#AttackMatchup.new(@number, attacker, defender).number_of_attacks
     defender_attacks = nil#AttackMatchup.new(@number, defender, attacker).number_of_attacks
+    attacker_results = []
+    defender_results = []
     build_matchups.to_a.each do |initiative_matchups|
       initiative = initiative_matchups[0]
       matchups = initiative_matchups[1]
-      matchups.map do |matchup|
+      matchups.map { |matchup|
         [matchup, matchup.attack]
-      end.each { |matchup| matchup[0].defender.take_wounds(matchup[1]) }
+      }.each { |matchup, result|
+        matchup.defender.take_wounds(result.unsaved_wounds)
+      }.map { |matchup, result|
+        if matchup.attacker == attacker
+          attacker_results << result
+        else
+          defender_results << result
+        end
+      }
     end
+
+    attacker_result = attacker_results.reduce(AttackMatchupResult.new(0,0,0,0), &:+)
+    defender_result = defender_results.reduce(AttackMatchupResult.new(0,0,0,0), &:+)
 
     outcome = if attacker.dead? && defender.dead?
       BOTH_DEAD
@@ -59,13 +72,13 @@ class Round
     elsif attacker.dead?
       DEFENDER_WIN
     else
-      compute_combat_resolution(attacker, defender)
+      compute_combat_resolution(attacker, defender, attacker_result, defender_result)
     end
 
     RoundResult.new(
       outcome,
-      RoundStats.new(attacker_attacks, attacker.hits, attacker.wounds_caused, attacker.unsaved_wounds),
-      RoundStats.new(defender_attacks, defender.hits, defender.wounds_caused, defender.unsaved_wounds)
+      attacker_result,
+      defender_result,
     )
   end
 
@@ -73,8 +86,8 @@ class Round
     AttackMatchup.new(@number, attacker, defender).attack
   end
 
-  def compute_combat_resolution(attacker, defender)
-    res_difference = attacker.combat_res_earned - defender.combat_res_earned
+  def compute_combat_resolution(attacker, defender, attacker_result, defender_result)
+    res_difference = attacker.combat_res_earned(attacker_result) - defender.combat_res_earned(defender_result)
 
     if res_difference > 0
       if defender.roll_break_test(res_difference, attacker.number_of_ranks)

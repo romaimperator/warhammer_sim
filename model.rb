@@ -1,18 +1,6 @@
 class Model < Struct.new(:name, :parts, :mm_width, :mm_length, :equipment)
   attr_accessor :unit
 
-  def hits
-    parts.reduce(0) { |sum, part| sum + part.hits }
-  end
-
-  def unsaved_wounds
-    parts.reduce(0) { |sum, part| sum + part.unsaved_wounds }
-  end
-
-  def wounds_caused
-    parts.reduce(0) { |sum, part| sum + part.wounds_caused }
-  end
-
   def initialize(*args, &block)
     super
     parts.each do |part|
