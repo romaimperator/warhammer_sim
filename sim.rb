@@ -7,6 +7,8 @@ require_relative 'round'
 require_relative 'part'
 require_relative 'model'
 require_relative 'unit'
+require_relative 'standard_unit'
+require_relative 'rank_and_file_unit'
 require_relative 'simulation'
 require_relative 'equipment/halberd'
 require_relative 'equipment/spear'
@@ -20,7 +22,14 @@ require_relative 'equipment/extra_hand_weapon'
 NUMBER_OF_TRIALS = 100
 
 def main
-    u = Unit.new(
+  p RankAndFileUnit.new(5, Model.new("halberd", [
+              Part.new("man", 3, 3, 3, 1, 3, 2, 7, 6, 7, []),
+  ], 20, 20, []), 11, [1, 3] => Model.new("champion", [
+              Part.new("man", 3, 3, 3, 1, 3, 2, 7, 6, 7, []),
+            ], 40, 40, [])).inspect
+  exit
+
+    u = StandardUnit.new(
           Model.new("halberd", [
             Part.new("man", 3, 3, 3, 1, 3, 1, 7, 6, 7, []),
           ], 20, 20, []), {
@@ -34,7 +43,7 @@ def main
             Halberd.new,
           ]
         )
-    s = Unit.new(
+    s = StandardUnit.new(
           Model.new("sword", [
             Part.new("man", 4, 3, 3, 1, 3, 1, 7, 5, 6, []),
           ], 20, 20, []), {
@@ -48,7 +57,7 @@ def main
             #Halberd.new,
           ]
     )
-    b = Unit.new(
+    b = StandardUnit.new(
           Model.new("witch elves", [
             Part.new("elf", 4, 3, 3, 1, 5, 2, 7, 7, 7, [])
           ], 20, 20, []), {}, 20, 5, 60, [

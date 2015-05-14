@@ -1,3 +1,4 @@
+require 'spec_helper'
 require File.expand_path(File.dirname(__FILE__) + "/../unit")
 require "factories/unit_factory"
 
@@ -12,19 +13,19 @@ describe Unit do
     it "returns true if the test is passed" do
       roll = 6
       modifier = -1
-      expect(unit.check_break_test(roll, modifier)).to be_true
+      assert unit.check_break_test(roll, modifier)
     end
 
     it "returns true if the roll is snake eyes" do
       roll = 2
       modifier = -100
-      expect(unit.check_break_test(roll, modifier)).to be_true
+      assert unit.check_break_test(roll, modifier)
     end
 
     it "returns false if the unit fails the test" do
       roll = 8
       modifier = -1
-      expect(unit.check_break_test(roll, modifier)).to be_false
+      refute unit.check_break_test(roll, modifier)
     end
   end
 
@@ -63,6 +64,21 @@ describe Unit do
     it "returns the rank even when there aren't regular models in the rank" do
       unit = subject.size(1).special_models(special_models).build
       expect(unit.farthest_back_special_model_occupied_space).to eq(2)
+    end
+  end
+
+  describe "#find_targets" do
+  end
+
+  describe "#hit_reroll_values" do
+    it "delegates to the item caller method" do
+      unit = subject.build
+      round_number = 1
+      to_hit_number = 2
+      unit.should_receive(:item_manipulation)
+        .with(:hit_reroll_values, [], round_number, to_hit_number)
+        .and_return([1])
+      unit.hit_reroll_values(round_number, to_hit_number)
     end
   end
 
@@ -115,7 +131,8 @@ describe Unit do
       starting_value = 0
       args = [1, 2, 3]
       item = Equipment.new
-      item.should_receive(:test_method).with(*args).and_return(starting_value)
+      item.should_receive(:test_method).with(starting_value,
+                                             *args).and_return(starting_value)
       unit = subject.equipment([item]).build
       expect(unit.item_manipulation(:test_method, starting_value,
                                     *args)).to eq(starting_value)
@@ -175,6 +192,17 @@ describe Unit do
     it "doesn't return duplicate models" do
       expect(unit.models_in_mm_range(0, 200)).to eq([special_models[[1, 5]],
                                                      unit.model])
+    end
+  end
+
+  describe "#number_of_attacks" do
+    it "delegates to the item caller method" do
+      unit = subject.build
+      defender = subject.build
+      round_number = 1
+      unit.should_receive(:item_manipulation)
+        .with(:number_of_attacks, 0, round_number, unit)
+      unit.number_of_attacks(round_number, defender)
     end
   end
 
@@ -247,11 +275,23 @@ describe Unit do
 
   describe "#stats" do
     it "delegates to the item caller method" do
-      round_number = 1
       unit = subject.build
+      round_number = 1
       unit.should_receive(:item_manipulation).with(:stats, unit.model,
                                                    round_number)
       unit.stats(round_number)
+    end
+  end
+
+  describe "#wound_reroll_values" do
+    it "delegates to the item caller method" do
+      unit = subject.build
+      round_number = 1
+      to_wound_number = 2
+      unit.should_receive(:item_manipulation)
+        .with(:wound_reroll_values, [], round_number, to_wound_number)
+        .and_return([1])
+      unit.wound_reroll_values(round_number, to_wound_number)
     end
   end
 

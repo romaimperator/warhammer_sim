@@ -3,8 +3,10 @@
 set -e
 
 if [ -n "$1" ]; then
-    rspec --color "$1"
+    #rspec --color "$1"
+    ruby -Ispec "$1"
 else
-    rspec --color --format progress --require "~/lib/vim_rspec_formatter" --format VimFormatter spec
+    #rspec --color --format progress --require "~/lib/vim_rspec_formatter" --format VimFormatter spec
+    rake test
 fi
 
