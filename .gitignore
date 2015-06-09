@@ -2,4 +2,8 @@ attacker_wounds_per_round.gif
 defender_wounds_per_round.gif
 .DS_store
 *.sw?
+\#*
+.#*
+.rubocop.yml
+.rubocop_todo.yml
 

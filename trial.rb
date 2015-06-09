@@ -1,37 +1,38 @@
-require_relative 'trial_result'
+require_relative "trial_result"
 
+# This class is responsible for managing a single trial of combat between two
+# units and collecting the results.
 class Trial
   attr_reader :results
 
   def initialize(&block)
-    @setup_combat = block
+    @attacking_unit, @defending_unit = block.call
+    @rounds = []
   end
 
   def simulate
-    attacking_unit, defending_unit = @setup_combat.call
-    fighting = true
-    rounds = []
-    while fighting
-      result = Round.new(rounds.size + 1, attacking_unit, defending_unit).simulate
-      rounds << result
-      if result.outcome == ATTACKER_WIN
-        fighting = false
-      elsif result.outcome == DEFENDER_WIN
-        fighting = false
-      elsif result.outcome == ATTACKER_FLEE
-        fighting = false
-      elsif result.outcome == DEFENDER_FLEE
-        fighting = false
-      elsif result.outcome == BOTH_DEAD
-        fighting = false
-      elsif result.outcome == ATTACKER_HOLD
-      elsif result.outcome == DEFENDER_HOLD
-      elsif result.outcome == TIE
-      else
-        raise Exception.new("Bad result: #{result}")
-      end
+    loop do
+      result =
+        Round.new(@rounds.size + 1, @attacking_unit, @defending_unit).simulate
+      @rounds << result
+      p result
+      p stop_fighting?(result)
+      break if stop_fighting?(result)
     end
-    TrialResult.new(rounds.last.outcome, rounds, attacking_unit.size, defending_unit.size)
+    p "End of trial"
+    p(TrialResult.new(@rounds.last.outcome, @rounds, @attacking_unit.model_count,
+                    @defending_unit.model_count))
+  end
+
+  def stop_fighting?(result)
+    case result.outcome
+    when :attacker_win, :defender_win, :attacker_flee, :defender_flee, :both_dead
+      true
+    when :attacker_hold, :defender_hold, :tie
+      false
+    else
+      fail Exception, "Bad result: #{result}"
+    end
   end
 end
 

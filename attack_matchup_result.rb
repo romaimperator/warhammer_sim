@@ -1,4 +1,7 @@
-AttackMatchupResult = Struct.new(:attacks, :hits, :wounds_caused, :unsaved_wounds) do
+AttackMatchupResult = Struct.new(:attacks,
+                                 :hits,
+                                 :wounds_caused,
+                                 :unsaved_wounds) do
   def hit_percentage
     compute_percentage(hits, attacks)
   end
@@ -11,13 +14,13 @@ AttackMatchupResult = Struct.new(:attacks, :hits, :wounds_caused, :unsaved_wound
     compute_percentage(unsaved_wounds, wounds_caused)
   end
 
-  def +(other_result)
-    raise ArgumentError if !other_result.is_a?(AttackMatchupResult)
+  def +(other)
+    fail ArgumentError unless other.is_a?(AttackMatchupResult)
 
-    AttackMatchupResult.new(attacks + other_result.attacks,
-                            hits + other_result.hits,
-                            wounds_caused + other_result.wounds_caused,
-                            unsaved_wounds + other_result.unsaved_wounds)
+    AttackMatchupResult.new(attacks + other.attacks,
+                            hits + other.hits,
+                            wounds_caused + other.wounds_caused,
+                            unsaved_wounds + other.unsaved_wounds)
   end
 
   private

@@ -1,4 +1,7 @@
-class Model < Struct.new(:name, :parts, :mm_width, :mm_length, :equipment)
+# This class represents a single model in the simulation. It tracks equipment,
+# the size, etc.
+Model = Struct.new(:name, :parts, :mm_width, :mm_length, :equipment) do
+  include Comparable
   attr_accessor :unit
 
   def initialize(*args, &block)
@@ -47,14 +50,13 @@ class Model < Struct.new(:name, :parts, :mm_width, :mm_length, :equipment)
   end
 
   def notify_part_died(part_that_died)
-    if has_part?(part_that_died)
+    if includes_part?(part_that_died)
       remove_part(part_that_died)
 
-      if !has_any_parts?
-        unit.notify_model_died(self)
-      end
+      unit.notify_model_died(self) unless has_any_parts?
     else
-      raise Exception.new("Part #{part_that_died} not part of this model #{self}: #{parts}")
+      fail Exception,
+           "Part #{part_that_died} not part of this model #{self}: #{parts}"
     end
   end
 
@@ -66,9 +68,26 @@ class Model < Struct.new(:name, :parts, :mm_width, :mm_length, :equipment)
     end
   end
 
+  def hash
+    name.hash
+  end
+
+  def ==(other)
+    return false unless other.is_a?(Model)
+    name == other.name
+  end
+
+  def <=>(other)
+    name <=> other.name
+  end
+
+  def initiative_steps(round_number)
+    parts.map { |part| part.initiative(round_number) }.uniq
+  end
+
   private
 
-  def has_part?(part)
+  def includes_part?(part)
     parts.include?(part)
   end
 

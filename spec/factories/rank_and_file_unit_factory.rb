@@ -1,6 +1,7 @@
-require_relative '../../rank_and_file_unit'
-require_relative 'model_factory'
+require_relative "../../rank_and_file_unit"
+require_relative "model_factory"
 
+# Creates instances of RankAndFileUnits with default values for testing
 class RankAndFileUnitFactory
   def initialize
     @files = 5
@@ -10,7 +11,14 @@ class RankAndFileUnitFactory
   end
 
   def build
-    RankAndFileUnit.new(@files, @container_unit, @container_unit_count, @other_units)
+    RankAndFileUnit.new(@files, @container_unit, @container_unit_count,
+                        @other_units)
+  end
+
+  def build_positions
+    RankAndFileUnit.new_with_positions(@files, @container_unit,
+                                       @container_unit_count,
+                                       @other_units)
   end
 
   def files(files)

@@ -1,6 +1,6 @@
-require 'spec_helper'
-require_relative '../rank_list'
-require_relative '../alignment_strategy'
+require "spec_helper"
+require_relative "../rank_list"
+require_relative "../alignment_strategy"
 
 describe RankList do
   describe "#at" do
@@ -29,13 +29,35 @@ describe RankList do
     it "fills only up to the given number of empty spaces" do
       list = RankList.new(5, 2, LeftAlignStrategy)
       list.fill!("value", 7)
-      assert_equal [Rank.new(5, ["value"] * 5), Rank.new(5, ["value"] * 2)], list.the_grid
+      assert_equal [Rank.new(5, ["value"] * 5), Rank.new(5, ["value"] * 2)],
+                   list.the_grid
     end
 
     it "adds extra ranks if there weren't enough spaces in existing ranks" do
       list = RankList.new(5, 1, LeftAlignStrategy)
       list.fill!("value", 6)
-      assert_equal [Rank.new(5, ["value"] * 5), Rank.new(5, ["value"])], list.the_grid
+      assert_equal [Rank.new(5, ["value"] * 5), Rank.new(5, ["value"])],
+                   list.the_grid
+    end
+  end
+
+  describe "#unfill!" do
+    subject do
+      list = RankList.new(5, 2, LeftAlignStrategy)
+      list.fill!("value", 10)
+      list
+    end
+
+    it "removes the given number of the given value" do
+      subject.unfill!("value", 4)
+      assert_equal [Rank.new(5, ["value"] * 5), Rank.new(5, ["value"])],
+                   subject.the_grid
+    end
+
+    it "removes all of them if the given number is more than the number in " \
+      "the unit" do
+      subject.unfill!("value", 11)
+      assert_equal [], subject.the_grid
     end
   end
 

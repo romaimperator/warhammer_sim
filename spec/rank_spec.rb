@@ -1,5 +1,5 @@
-require 'spec_helper'
-require_relative '../rank'
+require "spec_helper"
+require_relative "../rank"
 
 describe Rank do
   describe "#[]" do
@@ -27,7 +27,8 @@ describe Rank do
   end
 
   describe "#adjust_empty_spaces" do
-    it "increments empty spaces when assigning a nil value to a filled position" do
+    it "increments empty spaces when assigning a nil value to a filled " \
+      "position" do
       rank = Rank.new(3, [1, 2, 3])
       assert_equal 1, rank.adjust_empty_spaces(0, nil)
     end
@@ -38,20 +39,25 @@ describe Rank do
     end
   end
 
-  describe "#align" do
-    it "calls align_rank" do
-      rank = Rank.new(2, [1])
-      alignment_strategy = double("strat")
-      expect(alignment_strategy).to receive(:align_rank)
-      rank.align(alignment_strategy)
+  describe "#each_with_index" do
+    it "passes through to the @rank's method" do
+      rank = Rank.new(3, [1, 2, 3])
+      expect(rank.rank).to receive(:each_with_index)
+      rank.each_with_index { |_, index| index }
     end
+  end
 
-    it "assigns the new rank" do
-      rank = Rank.new(2, [1])
-      alignment_strategy = double("strat")
-      expect(alignment_strategy).to receive(:align_rank) { "New Rank" }
-      rank.align(alignment_strategy)
-      assert_equal "New Rank", rank.rank
+  describe "#reverse!" do
+    it "reverses the rank in place" do
+      rank = Rank.new(3, [1, 2, 3])
+      assert_equal [3, 2, 1], rank.reverse!
+    end
+  end
+
+  describe "#size" do
+    it "returns the size of the rank" do
+      rank = Rank.new(3)
+      assert_equal 3, rank.size
     end
   end
 

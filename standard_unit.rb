@@ -12,28 +12,28 @@ class StandardUnit < Unit
   attr_accessor :offset
   attr_accessor :equipment
 
-  def initialize(_model, _special_models, _size, _width, _offset, _equipment)
+  def initialize(model, special_models, size, width, offset, equipment)
     super([model, *special_models])
-    self.model = _model
-    self.special_models = _special_models
-    self.size = _size
-    self.width = _width
-    self.offset = _offset
-    self.equipment = _equipment
+    self.model = model
+    self.special_models = special_models
+    self.size = size
+    self.width = width
+    self.offset = offset
+    self.equipment = equipment
     @hits = 0
     @unsaved_wounds = 0
     @wounds_caused = 0
     @manipulations_store = {}
     model.add_equipment(equipment)
     model.unit = self
-    special_models.each do |position, model|
-      model.add_equipment(equipment)
-      model.unit = self
+    special_models.each do |position, special_model|
+      special_model.add_equipment(equipment)
+      special_model.unit = self
     end
   end
 
   def get_all_parts
-    model.parts + special_models.values.reduce([]) { |part_array, special_model| part_array += special_model.parts }
+    model.parts + special_models.values.reduce([]) { |part_array, special_model| part_array + special_model.parts }
   end
 
   def get_matchups(target_unit)
@@ -189,9 +189,10 @@ class StandardUnit < Unit
     lower, upper = [first, second].sort!
     lower_position = find_position_from_mm(lower, true)
     upper_position = find_position_from_mm(upper, false)
-    models = (lower_position..upper_position).map do |position_number|
-               model_in_position(FIRST_RANK, position_number)
-             end
+    models =
+      (lower_position..upper_position).map do |position_number|
+        model_in_position(FIRST_RANK, position_number)
+      end
     models.uniq.sort_by { |model| model.name }
     #Hash[models.group_by { |model| model }.map { |key, value| [key, value.size] }]
   end

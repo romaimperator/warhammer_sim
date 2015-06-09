@@ -31,8 +31,24 @@ class Rank
     end
   end
 
-  def align(strategy=CenterAlignStrategy)
-    @rank = strategy.align_rank(@rank, @empty_spaces)
+  def each_with_index(&block)
+    @rank.each_with_index(&block)
+  end
+
+  def each(&block)
+    @rank.each(&block)
+  end
+
+  def reverse!
+    @rank.reverse!
+  end
+
+  def size
+    @files
+  end
+
+  def empty?
+    value_count(nil) == @files
   end
 
   def fill_blank_spaces(values)

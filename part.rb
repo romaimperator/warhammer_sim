@@ -1,4 +1,6 @@
-Part = Struct.new(:name, :_weapon_skill, :_strength, :_toughness, :_wounds, :_initiative, :_attacks, :_leadership, :_armor_save, :_ward_save, :equipment) do
+Part = Struct.new(:name, :_weapon_skill, :_strength, :_toughness, :_wounds,
+                  :_initiative, :_attacks, :_leadership, :_armor_save,
+                  :_ward_save, :equipment) do
   attr_accessor :model
 
   def initialize(*args, &block)
@@ -26,12 +28,22 @@ Part = Struct.new(:name, :_weapon_skill, :_strength, :_toughness, :_wounds, :_in
     item_manipulation(:wounds, _wounds)
   end
 
-  def initiative(defender)
-    item_manipulation(:initiative, _initiative, defender)
+  def initiative(round_number)
+    @round_number = round_number
+    item_manipulation(:initiative, _initiative)
   end
 
-  def attacks
-    item_manipulation(:attacks, _attacks, model.unit)
+  def attacks(round_number, rank)
+    @round_number = round_number
+    if rank == 1
+      item_manipulation(:attacks, _attacks, model.unit, rank)
+    elsif rank == 2
+      1
+    elsif rank == 3 && model.unit.is_horde?
+      1
+    else
+      0
+    end
   end
 
   def leadership
@@ -67,27 +79,29 @@ Part = Struct.new(:name, :_weapon_skill, :_strength, :_toughness, :_wounds, :_in
       model.unit.take_wounds(wounds_caused)
     else
       self._wounds -= wounds_caused
-      if dead?
-        model.notify_part_died(self)
-      end
+      model.notify_part_died(self) if dead?
     end
   end
 
   private
 
   def item_manipulation(method_name, starting_value, *args)
-    compute_value_block = Proc.new do
+    round_number = @round_number || model.unit.round_number
+    compute_value_block = proc do
       result = starting_value
       equipment.each do |item|
-        result = item.send(method_name, model.unit.round_number, result, *args)
+        result = item.send(method_name, round_number, result, *args)
       end
       result
     end
-    if !@manipulations_store[method_name]
-      @manipulations_store[method_name] = {}
-    end
-    @manipulations_store[method_name][model.unit.round_number] ||= compute_value_block.call
+    cache_fetch(method_name, round_number, &compute_value_block)
   end
 
+  def cache_fetch(method_name, round_number, &compute_value_block)
+    unless @manipulations_store[method_name]
+      @manipulations_store[method_name] = {}
+    end
+    @manipulations_store[method_name][round_number] ||= compute_value_block.call
+  end
 end
 

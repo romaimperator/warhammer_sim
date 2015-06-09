@@ -1,6 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + "../../../part")
 require_relative "../../equipment/halberd"
 
+# Creates instances of Parts with default values for testing
 class PartFactory
   attr_accessor :name
   attr_accessor :weapon_skill
@@ -21,7 +22,7 @@ class PartFactory
     @toughness = 3
     @wounds = 1
     @initiative = 3
-    @attacks = 1
+    @attacks = 3
     @leadership = 7
     @armor_save = 6
     @ward_save = 7

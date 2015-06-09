@@ -1,6 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + "../../../unit")
 require "factories/model_factory"
 
+# Creates Unit instances with default values for testing
 class UnitFactory
   attr_accessor :model,
                 :special_models,

@@ -11,34 +11,35 @@ class Simulation
   end
 
   def attacker_wins
-    sum_results(ATTACKER_WIN)
+    sum_results(:attacker_win)
   end
 
   def defender_wins
-    sum_results(DEFENDER_WIN)
+    sum_results(:defender_win)
   end
 
   def attacker_flee
-    sum_results(ATTACKER_FLEE)
+    sum_results(:attacker_flee)
   end
 
   def defender_flee
-    sum_results(DEFENDER_FLEE)
+    sum_results(:defender_flee)
   end
 
   def both_dead
-    sum_results(BOTH_DEAD)
+    sum_results(:both_dead)
   end
 
   def sum_results(successful_outcomes)
-    successful_outcomes = [successful_outcomes] unless successful_outcomes.is_a?(Array)
-    @trial_results.inject(0) do |sum, result|
-      if successful_outcomes.include?(result.outcome)
-        sum + 1
-      else
-        sum
-      end
-    end
+   #successful_outcomes = [successful_outcomes] unless successful_outcomes.is_a?(Array)
+    @trial_results.count { |result| result.outcome == successful_outcomes }
+   #@trial_results.reduce(0) do |sum, result|
+   #  if successful_outcomes.include?(result.outcome)
+   #    sum + 1
+   #  else
+   #    sum
+   #  end
+   #end
   end
 
   def attacker_wounds
