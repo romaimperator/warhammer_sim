@@ -16,9 +16,9 @@ class Round
   attr_accessor :defender
 
   def initialize(number, attacker, defender)
-    @number = number
-    self.attacker = attacker
-    self.defender = defender
+    @number   = number
+    @attacker = attacker
+    @defender = defender
   end
 
   def build_matchups(initiative_value)

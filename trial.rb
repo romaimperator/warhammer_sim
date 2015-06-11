@@ -15,13 +15,13 @@ class Trial
       result =
         Round.new(@rounds.size + 1, @attacking_unit, @defending_unit).simulate
       @rounds << result
-      p result
-      p stop_fighting?(result)
+      #p result
+      #p stop_fighting?(result)
       break if stop_fighting?(result)
     end
-    p "End of trial"
-    p(TrialResult.new(@rounds.last.outcome, @rounds, @attacking_unit.model_count,
-                    @defending_unit.model_count))
+    #p "End of trial"
+    TrialResult.new(@rounds.last.outcome, @rounds, @attacking_unit.model_count,
+                    @defending_unit.model_count)
   end
 
   def stop_fighting?(result)

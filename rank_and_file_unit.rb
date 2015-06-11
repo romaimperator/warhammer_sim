@@ -102,7 +102,7 @@ class RankAndFileUnit < Unit
   end
 
   def model_count
-    @size + @other_units.keys.size
+    @size + @other_units.size
   end
 
   def width
