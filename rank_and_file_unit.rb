@@ -95,6 +95,12 @@ class RankAndFileUnit < Unit
     end
   end
 
+  def destroy
+    @positions.unfill!(@container_unit, @size)
+    @size = 0
+    @other_units.each(&:destroy)
+  end
+
   def model_count
     @size + @other_units.keys.size
   end

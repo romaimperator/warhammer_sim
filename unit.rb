@@ -8,6 +8,10 @@ Unit = Struct.new(:contained_units) do
     end
   end
 
+  def destroy
+    fail NotYetImplemented
+  end
+  
   def model_count
     contained_units.reduce(0) { |a, e| a + e.model_count }
   end

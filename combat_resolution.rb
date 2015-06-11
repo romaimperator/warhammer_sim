@@ -10,7 +10,7 @@ CombatResolution = Struct.new(:attacker, :defender, :attacker_result,
     winner, loser, win_constant, flee_constant, hold_constant = find_combat_winner
     if roll_break_test(loser, resolution_difference, winner)
       if roll_pursuit >= roll_flee
-        loser.take_wounds(loser.model_count)
+        loser.destroy
         win_constant
       else
         flee_constant
