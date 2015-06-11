@@ -1,10 +1,18 @@
 class TrialResult < Struct.new(:outcome, :round_results, :attacker_size, :defender_size)
   def attacker_survivors
-    attacker_size
+    if attacker_size != 0
+      attacker_size
+    else
+      nil
+    end
   end
 
   def defender_survivors
-    defender_size
+    if defender_size != 0
+      defender_size
+    else
+      nil
+    end
   end
 
   def hits_caused_by_attacker_each_round
