@@ -50,16 +50,15 @@ class TrialRunner
 end
 
 def main
-  r = RankAndFileUnit.new_with_positions(5, Model.new("halberd", [
+  _ = RankAndFileUnit.new_with_positions(5, Model.new("halberd", [
     Part.new("man", 3, 3, 3, 1, 3, 2, 7, 6, 7, []),
   ], 20, 20, []), 12, [1, 3] => Model.new("champion", [
     Part.new("man", 3, 3, 3, 1, 3, 2, 7, 6, 7, []),
   ], 40, 40, []))
-  p r
-  11.times do
-    r.take_wounds(1)
-    p r
-  end
+  # 11.times do
+  #  r.take_wounds(1)
+  #  p r
+  # end
 
   hal = RankAndFileUnit.new_with_positions(10, Model.new("halberd", [
     Part.new("man", 3, 3, 3, 1, 3, 1, 7, 6, 7, []),
@@ -67,46 +66,6 @@ def main
   wit = RankAndFileUnit.new_with_positions(7, Model.new("witch elves", [
     Part.new("elf", 4, 3, 3, 1, 5, 2, 7, 7, 7, []),
   ], 20, 20, []), 21, {}, 20)
-
-  #  u = StandardUnit.new(
-  #        Model.new("halberd", [
-  #          Part.new("man", 3, 3, 3, 1, 3, 1, 7, 6, 7, []),
-  #        ], 20, 20, []), {
-  #          [1, 5] => Model.new("champion", [
-  #            Part.new("man", 3, 3, 3, 1, 3, 2, 7, 6, 7, []),
-  #          ], 20, 20, []),
-  #        },
-  #        40,
-  #        10,
-  #        -40, [
-  #          Halberd.new,
-  #        ]
-  #      )
-  #  s = StandardUnit.new(
-  #        Model.new("sword", [
-  #          Part.new("man", 4, 3, 3, 1, 3, 1, 7, 5, 6, []),
-  #        ], 20, 20, []), {
-  #          [1, 5] => Model.new("champion", [
-  #            Part.new("man", 4, 3, 3, 1, 3, 2, 7, 5, 6, []),
-  #          ], 20, 20, []),
-  #        },
-  #        40,
-  #        10,
-  #        -40, [
-  #          #Halberd.new,
-  #        ]
-  #  )
-  #  b = StandardUnit.new(
-  #        Model.new("witch elves", [
-  #          Part.new("elf", 4, 3, 3, 1, 5, 2, 7, 7, 7, [])
-  #        ], 20, 20, []), {}, 20, 5, 60, [
-  #          ExtraHandWeapon.new,
-  #          PoisonAttacks.new,
-  #          #RerollMisses.new,
-  #          #RerollWounds.new,
-  #          MurderousProwess.new,
-  #        ]
-  #      )
 
   simulator = Simulation.new(
     NUMBER_OF_TRIALS,
