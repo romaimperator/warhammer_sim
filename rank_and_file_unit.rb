@@ -133,10 +133,6 @@ class RankAndFileUnit < Unit
     rank_and_file == unit_in_question
   end
 
-  def combat_res_earned(result)
-    result.unsaved_wounds
-  end
-
   def selected_intervals
     fighting_ranks = [is_horde? ? 3 : 2, number_of_ranks].min
     fighting_ranks.times.map do |rank|

@@ -61,20 +61,6 @@ class Round
       end
       result
     end
-   #build_matchups.to_a.each do |initiative_matchups|
-   #  matchups = initiative_matchups[1]
-   #  matchups.map { |matchup|
-   #    [matchup, matchup.attack]
-   #  }.each { |matchup, result|
-   #    matchup.defender.take_wounds(result.unsaved_wounds)
-   #  }.map { |matchup, result|
-   #    if matchup.attacker == attacker
-   #      attacker_results << result
-   #    else
-   #      defender_results << result
-   #    end
-   #  }
-   #end
 
     attacker_result =
       attacker_results.reduce(AttackMatchupResult.new(0, 0, 0, 0), &:+)
