@@ -89,7 +89,7 @@ class Simulation
       ["First Round Hits", @trial_results.map(&:hits_caused_by_attacker_each_round).map { |v| v[0] }],
       ["First Round Wounds", @trial_results.map(&:wounds_caused_by_attacker_each_round).map { |v| v[0] }],
       ["First Round Unsaved", attacker_wounds_each_round.map {|v| v[0] }],
-      ["Survivor Models", @trial_results.map(&:attacker_survivors)],
+      ["Survivor Models", @trial_results.map(&:attacker_survivors).compact],
     ])
 
     puts
@@ -98,7 +98,7 @@ class Simulation
       ["First Round Hits", @trial_results.map(&:hits_caused_by_defender_each_round).map { |v| v[0] }],
       ["First Round Wounds", @trial_results.map(&:wounds_caused_by_defender_each_round).map { |v| v[0] }],
       ["First Round Unsaved", defender_wounds_each_round.map {|v| v[0] }],
-      ["Survivor Models", @trial_results.map(&:defender_survivors)],
+      ["Survivor Models", @trial_results.map(&:defender_survivors).compact],
     ])
 
     require 'gnuplot'
