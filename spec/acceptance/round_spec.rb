@@ -1,9 +1,9 @@
 require "spec_helper"
-require_relative "../../rank_and_file_unit"
-require_relative "../../model"
-require_relative "../../part"
-require_relative "../../round"
-require_relative "../../round_result"
+require "rank_and_file_unit"
+require "model"
+require "part"
+require "round"
+require "round_result"
 
 describe Round do
   describe "#simulate" do
@@ -23,8 +23,7 @@ describe Round do
     subject { Round.new(1, attacker, defender) }
 
     it "returns a RoundResult option" do
-      #p [0..20, 20..40, 40..60].select { |range| range === 15 || range === 25 }
-      assert_instance_of RoundResult, p(subject.simulate)
+      assert_instance_of RoundResult, subject.simulate
     end
   end
 end
