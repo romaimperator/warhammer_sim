@@ -17,7 +17,6 @@ class MyTest
   inline do |builder|
     builder.c "
     uint upper_file(uint upper_interval, uint right, uint mm_width, uint files) {
-      //upper_interval = right - upper_interval;
       uint upper = 0;
       if (upper_interval % mm_width == 0) {
         upper = upper_interval / mm_width + 1;
@@ -32,7 +31,6 @@ class MyTest
     }"
     builder.c "
     uint lower_file(uint lower_interval, uint right, uint mm_width, uint files) {
-      //lower_interval = right - lower_interval;
       int lower = lower_interval / mm_width;
       if (lower > 1) {
         return lower;
@@ -139,16 +137,6 @@ class RankAndFileUnit < Unit
     rank_and_file == unit_in_question
   end
 
-  def selected_intervals
-    fighting_ranks = [is_horde? ? 3 : 2, number_of_ranks].min
-    fighting_ranks.times.map do |rank|
-      @positions.selected_intervals(@container_unit, rank).map do |matching_file|
-        [(matching_file - 1) * @container_unit.mm_width,
-         matching_file * @container_unit.mm_width]
-      end
-    end
-  end
-
   def targets_in_intervals(intervals, helper=MyTest.new)
     target_list = nil
     intervals = convert_coordinates(intervals)
@@ -187,41 +175,6 @@ class RankAndFileUnit < Unit
     end
     @positions.unfill!(@container_unit, number_of_wounds)
   end
-
-  def units_with_initiative(initiative_value, round_number)
-    @positions.each_position do |rank, file, unit|
-      if unit.initiative(round_number) == initiative_value
-        yield rank, file, unit
-      end
-    end
-  end
-
- #def rank_and_file_matchups(target_unit, round_number)
- #  matchups     = []
- #  intervals    = []
- #  current_rank = 1
- #  @positions.find_each(rank_and_file) do |rank, file, _|
- #    if rank != current_rank
- #      attacks = @container_unit.attacks(round_number, current_rank)
- #      targets = target_unit.targets_in_intervals(intervals)
- #      targets.each do |count, target_list|
- #        target_strategy = TargetStrategy::RankAndFileFirst.new(@container_unit, target_unit)
- #        matchups << AttackMatchup.new(round_number, @container_unit, count * attacks, target_strategy.pick(target_list))
- #      end
- #      intervals = []
- #      current_rank = rank
- #    end
- #    intervals << [(file - 1) * @container_unit.mm_width,
- #                  file * @container_unit.mm_width]
- #  end
- #  attacks = @container_unit.attacks(round_number, current_rank)
- #  targets = target_unit.targets_in_intervals(intervals)
- #  targets.each do |count, target_list|
- #    target_strategy = TargetStrategy::RankAndFileFirst.new(@container_unit, target_unit)
- #    matchups << AttackMatchup.new(round_number, @container_unit, count * attacks, target_strategy.pick(target_list))
- #  end
- #  matchups
- #end
 
   def rank_and_file_intervals
     intervals = []

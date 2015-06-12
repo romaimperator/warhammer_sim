@@ -97,56 +97,11 @@ describe RankAndFileUnit do
   end
 
   describe "#left" do
+    # TODO: Implement this test
   end
 
   describe "#right" do
-  end
-
-  describe "#selected_intervals" do
-    it "returns all intervals that contain only models from the rank and file" \
-      " unit" do
-      other_units = {
-        [1, 3] => ModelFactory.new.name("champ").mm_width(20).build,
-        [1, 5] => ModelFactory.new.name("champ").mm_width(20).build,
-      }
-      unit = RankAndFileUnitFactory.new.files(6).other_units(other_units)
-        .build_positions
-      assert_equal [[[0, 20], [20, 40], [60, 80], [100, 120]],
-                    [[0, 20], [20, 40], [40, 60], [60, 80], [80, 100], [100, 120]]],
-                   unit.selected_intervals
-    end
-
-    it "is the unit's left and right sides if no other units in the first " \
-      "rank" do
-      other_units = {
-        [2, 3] => ModelFactory.new.name("champ").mm_width(20).build,
-      }
-      unit = RankAndFileUnitFactory.new.files(5).other_units(other_units)
-        .build_positions
-      assert_equal [[[0, 20], [20, 40], [40, 60], [60, 80], [80, 100]],
-                    [[0, 20], [20, 40], [60, 80], [80, 100]]],
-                   unit.selected_intervals
-    end
-
-    it "returns three ranks worth if the unit is a horde" do
-      other_units = {
-        [1, 3] => ModelFactory.new.name("champ").mm_width(20).build,
-        [1, 5] => ModelFactory.new.name("champ").mm_width(20).build,
-      }
-      unit = RankAndFileUnitFactory.new.container_unit_count(30).files(10).other_units(other_units)
-        .build_positions
-      assert_equal 3, unit.selected_intervals.size
-    end
-
-    it "returns only as many ranks as have soldiers in them even if in a horde" do
-      other_units = {
-        [1, 3] => ModelFactory.new.name("champ").mm_width(20).build,
-        [1, 5] => ModelFactory.new.name("champ").mm_width(20).build,
-      }
-      unit = RankAndFileUnitFactory.new.container_unit_count(8).files(10).other_units(other_units)
-        .build_positions
-      assert_equal 1, unit.selected_intervals.size
-    end
+    # TODO: Implement this test
   end
 
   describe "#targets_in_intervals" do

@@ -62,26 +62,6 @@ class RankList
     @the_grid == other.the_grid
   end
 
-  def selected_intervals(find_value, rank)
-    return [] if rank >= @the_grid.size
-    return to_enum(__callee__, find_value, rank) unless block_given?
-    @the_grid[rank].each_with_index do |value, file|
-      if value == find_value
-        yield file + 1
-      end
-    end
-  end
-
-  def each_position
-    @the_grid.each_with_index do |rank, rank_number|
-      rank.each_with_index do |file, file_number|
-        if file != nil
-          yield rank_number + 1, file_number + 1, file
-        end
-      end
-    end
-  end
-
   def find_each(find_value)
     @the_grid.each_with_index do |rank, rank_number|
       rank.each_with_index do |file, file_number|
