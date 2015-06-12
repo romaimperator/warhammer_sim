@@ -1,5 +1,7 @@
 require "minitest/autorun"
 require "minitest/rspec_mocks"
+require "rspec/expectations"
+require "rspec/matchers"
 
 # Add the spec directory to LOAD_PATH
 $LOAD_PATH.unshift(File.expand_path("..", __FILE__))
@@ -10,6 +12,7 @@ module Minitest
   # Reopen Test class to include RSpec Mocks
   class Test
     include Minitest::RSpecMocks
+    include RSpec::Matchers
   end
 end
 

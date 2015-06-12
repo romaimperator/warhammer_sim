@@ -24,10 +24,8 @@ class Round
   def build_matchups(initiative_value)
     attacker_matchups = attacker.matchups_for_initiative(initiative_value,
                                                          @number, defender)
-    p "Attacker Matchups: #{attacker_matchups}"
     defender_matchups = defender.matchups_for_initiative(initiative_value,
                                                          @number, attacker)
-    p "Defender Matchups: #{defender_matchups}"
     [attacker_matchups, defender_matchups]
   end
 
@@ -37,53 +35,42 @@ class Round
   end
 
   def simulate
-    attacker_results = []
-    defender_results = []
+    attacker_result = AttackMatchupResult.new(0, 0, 0, 0)
+    defender_result = AttackMatchupResult.new(0, 0, 0, 0)
     initiative_steps.reverse_each do |initiative_value|
       all_matchups = build_matchups(initiative_value)
       all_matchups.map! { |matchup_group| matchup_group.map! { |matchup| [matchup, matchup.attack] } }
-      attacker_results += all_matchups[0]
-      defender_results += all_matchups[1]
-    end
-    attacker_results.map! do |matchup, result|
-      if defender.is_rank_and_file?(matchup.defender)
-        defender.take_wounds(result.unsaved_wounds)
-      else
-        matchup.defender.take_wounds(result.unsaved_wounds)
+      all_matchups.each do |results|
+        results.map! do |matchup, result|
+          matchup.defender.take_wounds(result.unsaved_wounds)
+          result
+        end
       end
-      result
-    end
-    defender_results.map! do |matchup, result|
-      if attacker.is_rank_and_file?(matchup.defender)
-        attacker.take_wounds(result.unsaved_wounds)
-      else
-        matchup.defender.take_wounds(result.unsaved_wounds)
-      end
-      result
+      attacker_result = all_matchups[0].reduce(attacker_result, &:+)
+      defender_result = all_matchups[1].reduce(defender_result, &:+)
     end
 
-    attacker_result =
-      attacker_results.reduce(AttackMatchupResult.new(0, 0, 0, 0), &:+)
-    defender_result =
-      defender_results.reduce(AttackMatchupResult.new(0, 0, 0, 0), &:+)
-
-    outcome =
-      if attacker.dead? && defender.dead?
-        :both_dead
-      elsif defender.dead?
-        :attacker_win
-      elsif attacker.dead?
-        :defender_win
-      else
-        CombatResolution.new(attacker, defender, attacker_result,
-                             defender_result).compute
-      end
+    #p attacker.positions
+    #p defender.positions
 
     RoundResult.new(
-      outcome,
+      compute_outcome(attacker, defender, attacker_result, defender_result),
       attacker_result,
       defender_result,
     )
+  end
+
+  def compute_outcome(attacker, defender, attacker_result, defender_result)
+    if attacker.dead? && defender.dead?
+      :both_dead
+    elsif defender.dead?
+      :attacker_win
+    elsif attacker.dead?
+      :defender_win
+    else
+      CombatResolution.new(attacker, defender, attacker_result,
+                           defender_result).compute
+    end
   end
 end
 

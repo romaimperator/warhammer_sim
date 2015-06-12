@@ -11,6 +11,7 @@ require "model"
 require "unit"
 require "standard_unit"
 require "rank_and_file_unit"
+require "rank_and_file_model"
 require "simulation"
 require "equipment/halberd"
 require "equipment/spear"
@@ -20,6 +21,7 @@ require "equipment/reroll_wounds"
 require "equipment/murderous_prowess"
 require "equipment/poison_attacks"
 require "equipment/extra_hand_weapon"
+require "equipment/standard"
 
 # ready "testing" do
 #  before do
@@ -37,7 +39,7 @@ require "equipment/extra_hand_weapon"
 #  end
 # end
 
-NUMBER_OF_TRIALS = 100
+NUMBER_OF_TRIALS = 200
 
 class TrialRunner
   def initialize(&block)
@@ -60,12 +62,12 @@ def main
   #  p r
   # end
 
-  hal = RankAndFileUnit.new_with_positions(10, Model.new("halberd", [
+  hal = RankAndFileUnit.new_with_positions(10, RankAndFileModel.new("halberd", [
     Part.new("man", 3, 3, 3, 1, 3, 1, 7, 6, 7, []),
-  ], 20, 20, []), 40, {}, -40)
-  wit = RankAndFileUnit.new_with_positions(7, Model.new("witch elves", [
+  ], 20, 20, [Halberd.new]), 40, {}, -40, [Standard.new])
+  wit = RankAndFileUnit.new_with_positions(7, RankAndFileModel.new("witch elves", [
     Part.new("elf", 4, 3, 3, 1, 5, 2, 7, 7, 7, []),
-  ], 20, 20, []), 21, {}, 20)
+  ], 20, 20, [PoisonAttacks.new, RerollMisses.new, ExtraHandWeapon.new, MurderousProwess.new]), 21, {}, 20, [Standard.new])
 
   simulator = Simulation.new(
     NUMBER_OF_TRIALS,

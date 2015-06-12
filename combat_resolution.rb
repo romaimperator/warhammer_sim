@@ -1,5 +1,29 @@
+require "inline"
+
 require "constants"
 require "die_roller"
+
+class CombatResolutionHelper
+  def self.combat_resolution_helper
+    @combat_resolution_helper ||= CombatResolutionHelper.new
+  end
+
+  def self.rank_bonus(number_of_ranks)
+    #combat_resolution_helper.rank_bonus(number_of_ranks)
+    [number_of_ranks, 3].min
+  end
+
+  inline do |builder|
+    builder.c "
+    uint rank_bonus(uint number_of_ranks) {
+      if (number_of_ranks <= 3) {
+        return number_of_ranks;
+      } else {
+        return 3;
+      }
+    }"
+  end
+end
 
 CombatResolution = Struct.new(:attacker, :defender, :attacker_result,
                               :defender_result) do
@@ -9,6 +33,7 @@ CombatResolution = Struct.new(:attacker, :defender, :attacker_result,
     return :tie if resolution_difference == 0
     winner, loser, win_constant, flee_constant, hold_constant = find_combat_winner
     if roll_break_test(loser, resolution_difference, winner)
+      loser.lose_standard_bearer
       if roll_pursuit >= roll_flee
         loser.destroy
         win_constant
@@ -35,7 +60,21 @@ CombatResolution = Struct.new(:attacker, :defender, :attacker_result,
   end
 
   def combat_resolution_earned(unit, result)
-    result.unsaved_wounds
+    result.unsaved_wounds +
+      rank_bonus(unit) +
+      standard_bearer(unit)
+  end
+
+  def rank_bonus(unit)
+    [unit.number_of_ranks, 3].min
+  end
+
+  def standard_bearer(unit)
+    if unit.has_standard?
+      1
+    else
+      0
+    end
   end
 
   def roll_break_test(unit, modifier, defender)

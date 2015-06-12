@@ -69,7 +69,7 @@ Model = Struct.new(:name, :parts, :mm_width, :mm_length, :equipment) do
   end
 
   def hash
-    name.hash
+    @hash ||= name.hash
   end
 
   def ==(other)

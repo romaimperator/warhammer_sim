@@ -6,10 +6,23 @@ require "rank_list"
 require "alignment_strategy"
 require "target_finder"
 require "target_strategy"
+require "equipment/standard"
 
 class ConversionHelper
+  def self.conversion_helper
+    @conversion_helper ||= ConversionHelper.new
+  end
+
   def self.convert(right, offset, coordinate)
-    right + offset - coordinate
+    #right + offset - coordinate
+    conversion_helper.convert(right, offset, coordinate)
+  end
+
+  inline do |builder|
+    builder.c "
+    int convert(int right, int offset, int coordinate) {
+      return right + offset - coordinate;
+    }"
   end
 end
 
@@ -66,22 +79,24 @@ class RankAndFileUnit < Unit
   attr_reader :offset
   alias_method :rank_and_file, :container_unit
 
-  def initialize(files, container_unit, container_unit_count, other_units, offset=0)
+  def initialize(files, container_unit, container_unit_count, other_units, offset=0, equipment=[])
     super([container_unit, *other_units.values])
     @container_unit             = container_unit
+    @container_unit.unit        = self
     @size                       = container_unit_count
     @other_units                = other_units
     @files                      = files
     @offset                     = offset
+    @equipment                  = equipment
     contained_units.each do |unit|
       unit.unit = self
     end
   end
 
   def self.new_with_positions(files, container_unit, container_unit_count,
-                              other_units, offset=0)
+                              other_units, offset=0, equipment=[])
     unit = RankAndFileUnit.new(files, container_unit, container_unit_count,
-                               other_units, offset)
+                               other_units, offset, equipment)
     unit.send(:assign_positions)
     unit
   end
@@ -231,6 +246,17 @@ class RankAndFileUnit < Unit
     matchups
   end
 
+  def has_standard?
+    @size > 0 && @equipment.include?(Standard.new)
+  end
+
+  def lose_standard_bearer
+    if has_standard?
+      @size -= 1
+      @equipment -= [Standard.new]
+    end
+  end
+
   private
 
   def assign_positions
@@ -271,9 +297,13 @@ class RankAndFileUnit < Unit
   def convert_coordinates(coordinate_list)
     coordinate_list.map do |element|
       if element.is_a?(Array)
-        element.map! { |coordinate| ConversionHelper.convert(right, offset, coordinate) }
+        element.map! { |coordinate|
+          right + offset - coordinate
+          #ConversionHelper.convert(right, offset, coordinate) }
+        }
       else
-        ConversionHelper.convert(right, offset, coordinate)
+        right + offset - coordinate
+        #ConversionHelper.convert(right, offset, coordinate)
       end
     end
   end

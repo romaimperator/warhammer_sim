@@ -11,12 +11,12 @@ class Rank
   end
 
   def [](file_position)
-    fail IndexError.new("Index is out of bounds: #{file_position}") if file_position > @files || file_position <= 0
+    fail IndexError, "Index is out of bounds: #{file_position}" if file_position > @files || file_position <= 0
     @rank[file_position - 1]
   end
 
   def []=(file_position, value)
-    fail IndexError.new("Index is out of bounds: #{file_position}") if file_position > @files || file_position <= 0
+    fail IndexError, "Index is out of bounds: #{file_position}" if file_position > @files || file_position <= 0
     adjust_empty_spaces(file_position - 1, value)
     @rank[file_position - 1] = value
   end
