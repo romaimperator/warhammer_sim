@@ -14,6 +14,7 @@ require "rank_and_file_unit"
 require "rank_and_file_model"
 require "champion"
 require "simulation"
+require "simulation_printer"
 require "equipment"
 require "stats"
 
@@ -35,7 +36,7 @@ include Equipment
 #  end
 # end
 
-NUMBER_OF_TRIALS = 200
+NUMBER_OF_TRIALS = 5_000
 
 class TrialRunner
   def initialize(&block)
@@ -78,6 +79,30 @@ def main
       ]
     end
   )
+  results = simulator.simulate
+
+  #champ   = Champion.new("champ", 20, 20, [Halberd.new], Stats.new(3, 3, 3, 1, 3, 2, 7, 6, 7))
+  halberd2 = RankAndFileModel.new("halberd", 20, 20, [Halberd.new],
+                                 Stats.new(3, 3, 3, 1, 3, 1, 7, 6, 7))
+  hal2 = RankAndFileUnit.new_with_positions(10, halberd2, 40, {}, -40, [Standard.new])
+  witch_elf2 = RankAndFileModel.new("witch elves", 20, 20,
+                                   [PoisonAttacks.new,
+                                    RerollMisses.new,
+                                    ExtraHandWeapon.new,
+                                    MurderousProwess.new],
+                                   Stats.new(4, 3, 3, 1, 5, 2, 7, 7, 7))
+  wit2 = RankAndFileUnit.new_with_positions(7, witch_elf2, 21, {}, 20, [Standard.new])
+
+  simulator2 = Simulation.new(
+    NUMBER_OF_TRIALS,
+    TrialRunner.new do
+      [
+        Marshal.load(Marshal.dump(hal2)),
+        Marshal.load(Marshal.dump(wit2))
+      ]
+    end
+  )
+  result2 = simulator2.simulate
 
   # puts u.draw
   # puts b.draw
@@ -92,8 +117,8 @@ def main
   # p u.models_in_mm_range(u.convert_coordinate(60), u.convert_coordinate(160))
   # p u.find_targets(b)[0]
 
-  simulator.simulate
-  simulator.print_results
+  SimulationPrinter.new(results, result2, NUMBER_OF_TRIALS).print_results
+  #simulator.print_results
 end
 
 def compute_offset(unit_with_offset, unit_needing_offset)

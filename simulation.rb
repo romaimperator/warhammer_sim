@@ -1,4 +1,9 @@
+require "simulation_result"
+
 class Simulation
+  attr_reader :trial_results
+  attr_reader :number_of_trials
+
   def initialize(number_of_trials, trial_runner)
     @number_of_trials = number_of_trials
     @trial_runner = trial_runner
@@ -8,6 +13,7 @@ class Simulation
     @trial_results = (1..@number_of_trials).map do |trial_number|
       @trial_runner.simulate
     end
+    SimulationResult.new(@trial_results)
   end
 
   def attacker_wins
