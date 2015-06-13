@@ -2,6 +2,13 @@ require_relative "compute_hit_needed"
 require_relative "compute_wound_needed"
 
 Unit = Struct.new(:contained_units) do
+  def initialize(*args, &block)
+    super
+    contained_units.each do |unit|
+      unit.parent_unit = self
+    end
+  end
+
   def dead?
     contained_units.reduce(true) do |previous_values, unit|
       previous_values && unit.dead?
@@ -11,7 +18,7 @@ Unit = Struct.new(:contained_units) do
   def destroy
     fail NotYetImplemented
   end
-  
+
   def model_count
     contained_units.reduce(0) { |a, e| a + e.model_count }
   end

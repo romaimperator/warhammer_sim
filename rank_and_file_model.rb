@@ -1,8 +1,8 @@
-require "model"
+require "lone_model"
 
-class RankAndFileModel < Model
+class RankAndFileModel < LoneModel
   def take_wounds(wounds_caused)
-    unit.take_wounds(wounds_caused)
+    parent_unit.take_wounds(wounds_caused)
   end
 end
 

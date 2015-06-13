@@ -12,8 +12,10 @@ require "unit"
 require "standard_unit"
 require "rank_and_file_unit"
 require "rank_and_file_model"
+require "champion"
 require "simulation"
 require "equipment"
+require "stats"
 
 include Equipment
 
@@ -46,22 +48,26 @@ class TrialRunner
 end
 
 def main
-  _ = RankAndFileUnit.new_with_positions(5, Model.new("halberd", [
-    Part.new("man", 3, 3, 3, 1, 3, 2, 7, 6, 7, []),
-  ], 20, 20, []), 12, [1, 3] => Model.new("champion", [
-    Part.new("man", 3, 3, 3, 1, 3, 2, 7, 6, 7, []),
-  ], 40, 40, []))
+ # _ = RankAndFileUnit.new_with_positions(5, Model.new("halberd", [
+ #   Part.new("man", 3, 3, 3, 1, 3, 2, 7, 6, 7, []),
+ # ], 20, 20, []), 12, [1, 3] => Model.new("champion", [
+ #   Part.new("man", 3, 3, 3, 1, 3, 2, 7, 6, 7, []),
+ # ], 40, 40, []))
   # 11.times do
   #  r.take_wounds(1)
   #  p r
   # end
 
-  hal = RankAndFileUnit.new_with_positions(10, RankAndFileModel.new("halberd", [
-    Part.new("man", 3, 3, 3, 1, 3, 1, 7, 6, 7, []),
-  ], 20, 20, [Halberd.new]), 40, {}, -40, [Standard.new])
-  wit = RankAndFileUnit.new_with_positions(7, RankAndFileModel.new("witch elves", [
-    Part.new("elf", 4, 3, 3, 1, 5, 2, 7, 7, 7, []),
-  ], 20, 20, [PoisonAttacks.new, RerollMisses.new, ExtraHandWeapon.new, MurderousProwess.new]), 21, {}, 20, [Standard.new])
+  halberd = RankAndFileModel.new("halberd", 20, 20, [Halberd.new],
+                                 Stats.new(3, 3, 3, 1, 3, 1, 7, 6, 7))
+  hal = RankAndFileUnit.new_with_positions(10, halberd, 40, {}, -40, [Standard.new])
+  witch_elf = RankAndFileModel.new("witch elves", 20, 20,
+                                   [PoisonAttacks.new,
+                                    RerollMisses.new,
+                                    ExtraHandWeapon.new,
+                                    MurderousProwess.new],
+                                   Stats.new(4, 3, 3, 1, 5, 2, 7, 7, 7))
+  wit = RankAndFileUnit.new_with_positions(7, witch_elf, 21, {}, 20, [Standard.new])
 
   simulator = Simulation.new(
     NUMBER_OF_TRIALS,

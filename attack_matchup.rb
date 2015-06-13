@@ -14,6 +14,8 @@ class AttackMatchup
     @attacker = attacker
     @attacks  = attacks
     @defender = defender
+    @attack_stats = attacker.attack_stats(round_number)
+    @defend_stats = defender.defend_stats(round_number)
   end
 
   def attack
@@ -28,8 +30,8 @@ class AttackMatchup
   end
 
   def roll_armor_save(caused_wounds)
-    save_modifier = @attacker.strength > 3 ? @attacker.strength - 3 : 0
-    roll_needed = @defender.armor_save + save_modifier
+    save_modifier = @attack_stats.strength > 3 ? @attack_stats.strength - 3 : 0
+    roll_needed = @defend_stats.armor_save + save_modifier
 
     caused_wounds - count_values_higher_than(roll_dice(caused_wounds),
                                              roll_needed)
@@ -37,7 +39,7 @@ class AttackMatchup
 
   def roll_extra_save(caused_wounds)
     caused_wounds - count_values_higher_than(roll_dice(caused_wounds),
-                                             @defender.ward_save)
+                                             @defend_stats.ward_save)
   end
 
   def roll_hits
@@ -64,8 +66,8 @@ class AttackMatchup
   end
 
   def to_hit_number
-    roll_needed = ComputeHitNeeded.hit_needed(@attacker.weapon_skill,
-                                              @defender.weapon_skill)
+    roll_needed = ComputeHitNeeded.hit_needed(@attack_stats.weapon_skill,
+                                              @defend_stats.weapon_skill)
     @attacker.equipment.each do |item|
       roll_needed = item.hit_needed(@round_number, roll_needed)
     end
@@ -73,8 +75,8 @@ class AttackMatchup
   end
 
   def to_wound_number
-    roll_needed = ComputeWoundNeeded.wound_needed(@attacker.strength,
-                                                  @defender.toughness)
+    roll_needed = ComputeWoundNeeded.wound_needed(@attack_stats.strength,
+                                                  @defend_stats.toughness)
     @attacker.equipment.each do |item|
       roll_needed = item.wound_needed(@round_number, roll_needed)
     end
