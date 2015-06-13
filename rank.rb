@@ -1,5 +1,18 @@
-require_relative 'alignment_strategy'
+require "inline"
 
+class RankHelper
+  inline do |builder|
+    builder.c_raw "
+    static VALUE at(int argc, VALUE *argv, VALUE self) {
+      int file_position = FIX2INT(argv[2]);
+      int files         = FIX2INT(argv[1]);
+      if (file_position > files || file_position <= 0) {
+        rb_raise(rb_eIndexError, \"Index is out of bounds: %d\", file_position);
+      }
+      return rb_ary_entry(argv[0], file_position - 1);
+    }"
+  end
+end
 class Rank
   attr_reader :rank,
               :files
@@ -8,11 +21,13 @@ class Rank
     @files = files
     @empty_spaces = files - values.size
     @rank = fill_blank_spaces(values)
+    @rank_helper = RankHelper.new
   end
 
   def [](file_position)
-    fail IndexError, "Index is out of bounds: #{file_position}" if file_position > @files || file_position <= 0
-    @rank[file_position - 1]
+    @rank_helper.at(@rank, @files, file_position)
+    #fail IndexError, "Index is out of bounds: #{file_position}" if file_position > @files || file_position <= 0
+    #@rank[file_position - 1]
   end
 
   def []=(file_position, value)

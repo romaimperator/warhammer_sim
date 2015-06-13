@@ -1,4 +1,3 @@
-require "set"
 require 'inline'
 
 require "unit"
@@ -6,7 +5,7 @@ require "rank_list"
 require "alignment_strategy"
 require "target_finder"
 require "target_strategy"
-require "equipment/standard"
+require "equipment"
 
 class ConversionHelper
   def self.conversion_helper
@@ -82,15 +81,12 @@ class RankAndFileUnit < Unit
   def initialize(files, container_unit, container_unit_count, other_units, offset=0, equipment=[])
     super([container_unit, *other_units.values])
     @container_unit             = container_unit
-    @container_unit.unit        = self
     @size                       = container_unit_count
     @other_units                = other_units
     @files                      = files
     @offset                     = offset
     @equipment                  = equipment
-    contained_units.each do |unit|
-      unit.unit = self
-    end
+    @interval_target_cache      = {}
   end
 
   def self.new_with_positions(files, container_unit, container_unit_count,
@@ -154,25 +150,36 @@ class RankAndFileUnit < Unit
 
   def targets_in_intervals(intervals, helper=MyTest.new)
     target_list = nil
-    intervals = convert_coordinates(intervals)
     intervals.reduce({}) { |a, interval|
-      upper_interval, lower_interval = interval
-      if upper_interval >= 0 && lower_interval <= right
-        upper_file = helper.upper_file(upper_interval, right, @container_unit.mm_width, @files)
-        lower_file = helper.lower_file(lower_interval, right, @container_unit.mm_width, @files)
-        #p "#{interval}:#{right} #{lower_file}..#{upper_file}"
-        target_list = (lower_file..upper_file).map do |file|
-          @positions.at(file, 1)
-        end
-        target_list.compact!
-        unless target_list.empty?
-          target_list.sort!
-          target_list.uniq!
-          if a[target_list]
-            a[target_list] += 1
-          else
-            a[target_list] = 1
+      target_list =
+        if @interval_target_cache[interval]
+          @interval_target_cache[interval]
+        else
+          @interval_target_cache[interval] = begin
+            upper_interval, lower_interval = convert_interval(interval)
+            if upper_interval >= 0 && lower_interval <= right
+              upper_file = helper.upper_file(upper_interval, right, @container_unit.mm_width, @files)
+              lower_file = helper.lower_file(lower_interval, right, @container_unit.mm_width, @files)
+              #p "#{interval}:#{right} #{lower_file}..#{upper_file}"
+              target_list = (lower_file..upper_file).map do |file|
+                @positions.at(file, 1)
+              end
+              target_list.compact!
+              unless target_list.empty?
+                target_list.sort!
+                target_list.uniq!
+              end
+              target_list
+            else
+              []
+            end
           end
+        end
+      unless target_list.empty?
+        if a[target_list]
+          a[target_list] += 1
+        else
+          a[target_list] = 1
         end
       end
       a
@@ -189,6 +196,9 @@ class RankAndFileUnit < Unit
       @size = 0
     end
     @positions.unfill!(@container_unit, number_of_wounds)
+    if number_of_ranks <= 1
+      @interval_target_cache = {}
+    end
   end
 
   def rank_and_file_intervals
@@ -294,17 +304,15 @@ class RankAndFileUnit < Unit
     ]
   end
 
+  def convert_interval(interval)
+    interval.map { |coordinate| right + offset - coordinate }
+  end
+
   def convert_coordinates(coordinate_list)
-    coordinate_list.map do |element|
-      if element.is_a?(Array)
-        element.map! { |coordinate|
-          right + offset - coordinate
-          #ConversionHelper.convert(right, offset, coordinate) }
-        }
-      else
+    coordinate_list.map! do |element|
+      element.map! { |coordinate|
         right + offset - coordinate
-        #ConversionHelper.convert(right, offset, coordinate)
-      end
+      }
     end
   end
 end
