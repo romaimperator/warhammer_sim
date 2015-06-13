@@ -107,7 +107,7 @@ class RankAndFileUnit < Unit
   def destroy
     @positions.unfill!(@container_unit, @size)
     @size = 0
-    @other_units.each(&:destroy)
+    @other_units.each { |_, unit| unit.destroy }
   end
 
   def model_count
@@ -257,14 +257,19 @@ class RankAndFileUnit < Unit
   end
 
   def has_standard?
-    @size > 0 && @equipment.include?(Standard.new)
+    @size > 0 && @equipment.include?(Equipment::Standard.new)
   end
 
   def lose_standard_bearer
     if has_standard?
       @size -= 1
-      @equipment -= [Standard.new]
+      @equipment -= [Equipment::Standard.new]
     end
+  end
+
+  def other_unit_died(unit)
+    @positions.unfill!(unit, 1)
+    @other_units.delete_if { |_, other_unit| other_unit == unit }
   end
 
   private
