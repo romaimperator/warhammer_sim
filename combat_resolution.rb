@@ -1,29 +1,4 @@
-require "inline"
-
-require "constants"
 require "die_roller"
-
-class CombatResolutionHelper
-  def self.combat_resolution_helper
-    @combat_resolution_helper ||= CombatResolutionHelper.new
-  end
-
-  def self.rank_bonus(number_of_ranks)
-    #combat_resolution_helper.rank_bonus(number_of_ranks)
-    [number_of_ranks, 3].min
-  end
-
-  inline do |builder|
-    builder.c "
-    uint rank_bonus(uint number_of_ranks) {
-      if (number_of_ranks <= 3) {
-        return number_of_ranks;
-      } else {
-        return 3;
-      }
-    }"
-  end
-end
 
 CombatResolution = Struct.new(:attacker, :defender, :attacker_result,
                               :defender_result) do
@@ -63,6 +38,10 @@ CombatResolution = Struct.new(:attacker, :defender, :attacker_result,
     result.unsaved_wounds +
       rank_bonus(unit) +
       standard_bearer(unit)
+      # flank
+      # rear
+      # charging
+      # challenge overkill
   end
 
   def rank_bonus(unit)
