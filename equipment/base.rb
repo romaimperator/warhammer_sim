@@ -3,13 +3,6 @@
 # to require doing so.
 module Equipment
   class Base
-    # Given the current round number and the current stat line, this method
-    # returns a modified stat line.
-    # Example usage: adding +2 strength on the first round of combat
-    def stats(_round_number, current_stats)
-      current_stats
-    end
-
     # Given the current round number and the to hit roll (value of 4 means 4+ to
     # hit), this method returns a modified to hit roll.
     # Example usage: adding +1 to hit
