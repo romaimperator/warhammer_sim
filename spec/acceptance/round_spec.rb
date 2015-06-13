@@ -5,7 +5,7 @@ require "model"
 require "rank_and_file_model"
 require "round_result"
 require "round"
-require "equipment/halberd"
+require "equipment"
 
 describe Round do
   describe "#simulate" do

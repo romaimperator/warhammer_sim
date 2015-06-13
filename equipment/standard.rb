@@ -1,8 +1,10 @@
-require "equipment/equipment"
+require "equipment/base"
 
-class Standard < Equipment
-  def ==(other)
-    other.is_a?(Standard)
+module Equipment
+  class Standard < Base
+    def ==(other)
+      other.is_a?(Standard)
+    end
   end
 end
 

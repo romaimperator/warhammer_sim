@@ -1,0 +1,11 @@
+require "equipment/base"
+
+require "equipment/extra_hand_weapon"
+require "equipment/halberd"
+require "equipment/murderous_prowess"
+require "equipment/poison_attacks"
+require "equipment/reroll_misses"
+require "equipment/reroll_wounds"
+require "equipment/spear"
+require "equipment/standard"
+require "equipment/sword_of_striking"

@@ -13,15 +13,9 @@ require "standard_unit"
 require "rank_and_file_unit"
 require "rank_and_file_model"
 require "simulation"
-require "equipment/halberd"
-require "equipment/spear"
-require "equipment/sword_of_striking"
-require "equipment/reroll_misses"
-require "equipment/reroll_wounds"
-require "equipment/murderous_prowess"
-require "equipment/poison_attacks"
-require "equipment/extra_hand_weapon"
-require "equipment/standard"
+require "equipment"
+
+include Equipment
 
 # ready "testing" do
 #  before do

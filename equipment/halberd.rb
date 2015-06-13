@@ -1,8 +1,10 @@
-require_relative 'equipment'
+require "equipment/base"
 
-class Halberd < Equipment
-  def strength(round_number, current_strength)
-    current_strength + 1
+module Equipment
+  class Halberd < Base
+    def strength(round_number, current_strength)
+      current_strength + 1
+    end
   end
 end
 

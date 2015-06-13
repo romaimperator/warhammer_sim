@@ -1,8 +1,10 @@
-require_relative 'equipment'
+require "equipment/base"
 
-class ExtraHandWeapon < Equipment
-  def attacks(round_number, current_attacks, unit, rank)
-    current_attacks + 1
+module Equipment
+  class ExtraHandWeapon < Base
+    def attacks(round_number, current_attacks, unit, rank)
+      current_attacks + 1
+    end
   end
 end
 

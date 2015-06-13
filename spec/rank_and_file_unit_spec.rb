@@ -3,6 +3,9 @@ require "benchmark/ips"
 require "spec_helper"
 require "factories/rank_and_file_unit_factory"
 require "attack_matchup"
+require "equipment"
+
+include Equipment
 
 describe RankAndFileUnit do
   describe "#dead?" do
