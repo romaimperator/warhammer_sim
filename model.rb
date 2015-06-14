@@ -1,9 +1,22 @@
+require "unit"
+
 # This class represents a single model in the simulation. It tracks equipment,
 # the size, etc.
-Model = Struct.new(:name, :mm_width, :mm_length, :equipment) do
+class Model < Unit
   include Comparable
   attr_accessor :parent_unit
+  attr_accessor :name
+  attr_accessor :mm_width
+  attr_accessor :mm_length
+  attr_accessor :equipment
 
+  def initialize(name, mm_width, mm_length, equipment)
+    @name      = name
+    @mm_width  = mm_width
+    @mm_length = mm_length
+    @equipment = equipment
+  end
+  
   def to_s
     name
   end
@@ -19,23 +32,7 @@ Model = Struct.new(:name, :mm_width, :mm_length, :equipment) do
   def defend_stats(round_number)
     fail NotYetImplemented
   end
-
-  def dead?
-    fail NotYetImplemented
-  end
-
-  def destroy
-    fail NotYetImplemented
-  end
-
-  def initiative_steps(round_number)
-    fail NotYetImplemented
-  end
-
-  def take_wounds(wounds_caused)
-    fail NotYetImplemented
-  end
-
+  
   def hash
     @hash ||= name.hash
   end

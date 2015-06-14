@@ -1,6 +1,6 @@
 require 'inline'
 
-require "unit"
+require "container_unit"
 require "rank_list"
 require "alignment_strategy"
 require "target_finder"
@@ -72,7 +72,7 @@ end
 #   goblin unit would be +20. The negative is because the goblin unit's left
 #   flank is left of the witch elf right flank and the positive is because for
 #   the goblin's the opposite is true.
-class RankAndFileUnit < Unit
+class RankAndFileUnit < ContainerUnit
   attr_reader :positions
   attr_reader :container_unit
   attr_reader :offset
@@ -150,7 +150,7 @@ class RankAndFileUnit < Unit
 
   def targets_in_intervals(intervals, helper=MyTest.new)
     target_list = nil
-    intervals.reduce({}) { |a, interval|
+    intervals.reduce({}) do |a, interval|
       target_list =
         if @interval_target_cache[interval]
           @interval_target_cache[interval]
@@ -183,10 +183,7 @@ class RankAndFileUnit < Unit
         end
       end
       a
-    }
-   #  .map { |target_list, count|
-   #  [count, target_list]
-   #}.sort!
+    end
   end
 
   def take_wounds(number_of_wounds)

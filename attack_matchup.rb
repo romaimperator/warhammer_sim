@@ -1,3 +1,7 @@
+require "compute_wounds"
+require "compute_hits"
+require "compute_hit_needed"
+require "compute_wound_needed"
 require "attack_matchup_result"
 require "die_roller"
 
