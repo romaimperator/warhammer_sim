@@ -21,3 +21,7 @@ ENUM_MAP = {
 def map_enum_to_string(enum)
   ENUM_MAP.fetch(enum)
 end
+
+# These are used to force attacks to be first or last
+ALWAYS_STRIKE_FIRST_INITIATIVE_VALUE = 11
+ALWAYS_STRIKE_LAST_INITIATIVE_VALUE  = 0

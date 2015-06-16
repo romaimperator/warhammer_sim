@@ -38,7 +38,7 @@ class LoneModel < Model
   end
 
   def initiative_steps(round_number)
-    [initiative(round_number)]
+    call_equipment(:initiative_steps, round_number, [initiative(round_number)])
   end
 
   def take_wounds(wounds_caused)
@@ -63,20 +63,27 @@ class LoneModel < Model
   end
 
   def matchups_for_initiative(initiative_value, round_number, target_unit)
+    matchups = []
     if initiative(round_number) == initiative_value &&
        attacks(round_number, 1) > 0
       interval = [[left, right]]
       target_list, count  = *target_unit.targets_in_intervals(interval)
       target_strategy = TargetStrategy::RankAndFileFirst.new(self, target_unit)
-      [AttackMatchup.new(round_number, self, attacks(round_number, 1), 
-                         target_strategy.pick(target_list))]
-    else
-      []
+      matchups << AttackMatchup.new(round_number, self, attacks(round_number, 1), 
+                                    target_strategy.pick(target_list))
     end
+    interval = [[left, right]]
+    target_list, count  = *target_unit.targets_in_intervals(interval)
+    target_strategy = TargetStrategy::RankAndFileFirst.new(self, target_unit)
+    matchups = call_equipment(:matchups_for_initiative, round_number, initiative_value, 1,
+                                  target_strategy.pick(target_list))
   end
-  
+
   def weapon_skill(round_number)
-    item_manipulation(round_number, :weapon_skill, @stats.weapon_skill)
+    # item_manipulation(round_number, :weapon_skill, @stats.weapon_skill)
+    equipment.reduce(@stats.weapon_skill) do |result, item|
+      item.send(:weapon_skill, round_number, result)
+    end
   end
 
   def strength(round_number)
@@ -97,7 +104,10 @@ class LoneModel < Model
 
   def attacks(round_number, rank)
     if rank == 1
-      item_manipulation(round_number, :attacks, @stats.attacks, parent_unit, rank)
+      # item_manipulation(round_number, :attacks, @stats.attacks, parent_unit, rank)
+      equipment.reduce(@stats.attacks) do |result, item|
+        item.send(:attacks, round_number, result, parent_unit, rank)
+      end
     elsif rank == 2 || (rank == 3 && parent_unit.is_horde?)
       1
     else

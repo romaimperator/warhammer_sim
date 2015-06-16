@@ -1,12 +1,13 @@
 require "die_roller"
 
-CombatResolution = Struct.new(:attacker, :defender, :attacker_result,
-                              :defender_result) do
+CombatResolution = Struct.new(:round_number, :attacker, :defender,
+                              :attacker_result, :defender_result) do
   INSANE_COURAGE_ROLL = 2
 
   def compute
     return :tie if resolution_difference == 0
     winner, loser, win_constant, flee_constant, hold_constant = find_combat_winner
+    loser.call_equipment_hook(:combat_round_lost, round_number, loser)
     if roll_break_test(loser, resolution_difference, winner)
       loser.lose_standard_bearer
       if roll_pursuit >= roll_flee
@@ -16,7 +17,11 @@ CombatResolution = Struct.new(:attacker, :defender, :attacker_result,
         flee_constant
       end
     else
-      hold_constant
+      if loser.dead?
+        win_constant
+      else
+        hold_constant
+      end
     end
   end
 
@@ -57,7 +62,7 @@ CombatResolution = Struct.new(:attacker, :defender, :attacker_result,
   end
 
   def roll_break_test(unit, modifier, defender)
-    result = sum_roll(2)
+    result = unit.call_equipment(:roll_break_test, round_number, sum_roll(2), modifier)
     if is_steadfast?(unit, defender)
       check_break_test(unit, result, 0)
     else
@@ -70,7 +75,8 @@ CombatResolution = Struct.new(:attacker, :defender, :attacker_result,
   end
 
   def check_break_test(unit, roll, modifier)
-    roll == INSANE_COURAGE_ROLL || !check_leadership_test(unit, roll, modifier)
+    current_result = roll == INSANE_COURAGE_ROLL || !check_leadership_test(unit, roll, modifier)
+    unit.call_equipment(:check_break_test, round_number, current_result, roll, modifier, unit)
   end
 
   def check_leadership_test(unit, roll, modifier)
@@ -85,4 +91,3 @@ CombatResolution = Struct.new(:attacker, :defender, :attacker_result,
     sum_roll(2)
   end
 end
-

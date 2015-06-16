@@ -35,6 +35,8 @@ class Round
   end
 
   def simulate
+    run_before_combat_hooks
+    
     attacker_result = AttackMatchupResult.new(0, 0, 0, 0)
     defender_result = AttackMatchupResult.new(0, 0, 0, 0)
     initiative_steps.reverse_each do |initiative_value|
@@ -68,9 +70,14 @@ class Round
     elsif attacker.dead?
       :defender_win
     else
-      CombatResolution.new(attacker, defender, attacker_result,
+      CombatResolution.new(@number, attacker, defender, attacker_result,
                            defender_result).compute
     end
+  end
+
+  def run_before_combat_hooks
+    attacker.call_equipment_hook(:before_combat, @number, @attacker, @defender)
+    defender.call_equipment_hook(:before_combat, @number, @defender, @attacker)
   end
 end
 

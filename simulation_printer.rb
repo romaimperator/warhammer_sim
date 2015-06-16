@@ -35,7 +35,7 @@ class SimulationPrinter
       ["First Round Hits", map_results(&:hits_caused_by_attacker_each_round).map { |v| v.map { |u| u[0] } }],
       ["First Round Wounds", map_results(&:wounds_caused_by_attacker_each_round).map { |v| v.map { |u| u[0] } }],
       ["First Round Unsaved", attacker_wounds_each_round.map {|v| v.map { |u| u[0] } }],
-      ["Survivor Models", map_results(&:attacker_survivors).map { |v| v.compact }],
+      ["Survivor Models", map_results(&:attacker_survivors).map { |v| v.compact!; v.empty? ? [0] : v }],
     ])
 
     puts
@@ -44,7 +44,7 @@ class SimulationPrinter
       ["First Round Hits", map_results(&:hits_caused_by_defender_each_round).map { |v| v.map { |u| u[0] } }],
       ["First Round Wounds", map_results(&:wounds_caused_by_defender_each_round).map { |v| v.map { |u| u[0] } }],
       ["First Round Unsaved", defender_wounds_each_round.map {|v| v.map { |u| u[0] } }],
-      ["Survivor Models", map_results(&:defender_survivors).map { |v| v.compact }],
+      ["Survivor Models", map_results(&:defender_survivors).map { |v| v.compact!; v.empty? ? [0] : v }],
     ])
   end
 

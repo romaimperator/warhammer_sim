@@ -7,24 +7,6 @@ require "target_finder"
 require "target_strategy"
 require "equipment"
 
-class ConversionHelper
-  def self.conversion_helper
-    @conversion_helper ||= ConversionHelper.new
-  end
-
-  def self.convert(right, offset, coordinate)
-    #right + offset - coordinate
-    conversion_helper.convert(right, offset, coordinate)
-  end
-
-  inline do |builder|
-    builder.c "
-    int convert(int right, int offset, int coordinate) {
-      return right + offset - coordinate;
-    }"
-  end
-end
-
 class MyTest
   inline do |builder|
     builder.c "
@@ -87,6 +69,8 @@ class RankAndFileUnit < ContainerUnit
     @offset                     = offset
     @equipment                  = equipment
     @interval_target_cache      = {}
+    @leftover_wounds            = 0
+    @equipment.each { |item| item.owner = self }
   end
 
   def self.new_with_positions(files, container_unit, container_unit_count,
@@ -187,15 +171,51 @@ class RankAndFileUnit < ContainerUnit
   end
 
   def take_wounds(number_of_wounds)
-    if @size >= number_of_wounds
-      @size -= number_of_wounds
+    puts "beginning size #{@size} of #{@container_unit.name}"
+    number_of_wounds += @leftover_wounds
+    @leftover_wounds = 0
+    if @size * @container_unit.wounds >= number_of_wounds
+      @size -= number_of_wounds / @container_unit.wounds
+      @leftover_wounds = number_of_wounds % @container_unit.wounds
+      call_equipment(:taken_wounds, 1, number_of_wounds)
     else
       @size = 0
+      call_equipment(:taken_wounds, 1, @size)
     end
-    @positions.unfill!(@container_unit, number_of_wounds)
+    @positions.unfill!(@container_unit, number_of_wounds / @container_unit.wounds)
     if number_of_ranks <= 1
       @interval_target_cache = {}
     end
+    puts "ending size #{@size} of #{@container_unit.name}"
+  end
+
+  def restore_wounds(number_of_wounds)
+    if @leftover_wounds >= number_of_wounds
+      @leftover_wounds -= number_of_wounds
+    else
+      models_to_restore = number_of_wounds / @container_unit.wounds
+      if number_of_ranks <= 1 && models_to_restore > 0
+        @interval_target_cache = {}
+      end
+      number_of_wounds -= @leftover_wounds
+      @size += models_to_restore
+      @leftover_wounds = number_of_wounds % @container_unit.wounds
+      @positions.fill!(@container_unit, models_to_restore)
+    end
+  end
+
+  def call_equipment(action_to_call, round_number, starting_value, *args)
+    # puts "args: #{action_to_call}, #{round_number}, #{starting_value}, #{args}"
+    @equipment.reduce(starting_value) { |a, item| item.send(action_to_call, round_number, a, *args) }
+  end
+
+  def call_equipment_hook(hook_to_call, round_number, *args)
+    @equipment.each { |item| item.send(hook_to_call, round_number, *args) }
+    contained_units.each { |unit| unit.call_equipment_hook(hook_to_call, round_number, *args) }
+  end
+
+  def remove_equipment(item)
+    @equipment -= [item]
   end
 
   def rank_and_file_intervals
@@ -209,21 +229,46 @@ class RankAndFileUnit < ContainerUnit
   end
 
   def rank_and_file_matchups(initiative_value, round_number, target_unit)
-    return [] unless rank_and_file.initiative(round_number) == initiative_value
     matchups = []
+    if rank_and_file.initiative(round_number) == initiative_value
+      rank = 0
+      final_targets = rank_and_file_intervals.reduce({}) do |targets, rank_intervals|
+        rank += 1
+        # attacks = rank_and_file.attacks(round_number, rank)
+        new_targets = target_unit.targets_in_intervals(rank_intervals)
+        new_targets = Hash[new_targets.map do |target_list, count|
+                             attacks = (1..count).reduce(0) do |attack_sum, index|
+                               attack_sum + rank_and_file.attacks(round_number, rank)
+                             end
+                             [target_list, attacks]
+                           end]
+        targets.merge(new_targets) do |key, old_val, new_val|
+          old_val + new_val
+        end
+      end
+      final_targets.each do |target_list, attacks|
+        target_strategy = TargetStrategy::RankAndFileFirst.new(@container_unit, target_unit)
+        matchups << AttackMatchup.new(round_number, @container_unit, attacks, target_strategy.pick(target_list))
+      end
+    end
     rank = 0
     final_targets = rank_and_file_intervals.reduce({}) do |targets, rank_intervals|
       rank += 1
-      attacks = rank_and_file.attacks(round_number, rank)
+      # attacks = rank_and_file.attacks(round_number, rank)
       new_targets = target_unit.targets_in_intervals(rank_intervals)
-      new_targets = Hash[new_targets.map { |target_list, count| [target_list, count * attacks] }]
+      new_targets = Hash[new_targets.map do |target_list, count|
+                           attacks = (1..count).reduce(0) do |attack_sum, index|
+                             attack_sum + 1
+                           end
+                           [target_list, attacks]
+                         end]
       targets.merge(new_targets) do |key, old_val, new_val|
         old_val + new_val
       end
     end
     final_targets.each do |target_list, attacks|
       target_strategy = TargetStrategy::RankAndFileFirst.new(@container_unit, target_unit)
-      matchups << AttackMatchup.new(round_number, @container_unit, attacks, target_strategy.pick(target_list))
+      matchups = rank_and_file.call_equipment(:matchups_for_initiative, round_number, matchups, initiative_value, attacks, target_strategy.pick(target_list))
     end
     matchups
   end
@@ -249,6 +294,7 @@ class RankAndFileUnit < ContainerUnit
                                         target_strategy.pick(target_list))
         end
       end
+      matchups = unit.call_equipment(:matchups_for_initiative, round_number, matchups, initiative_value, target_unit)
     end
     matchups
   end
@@ -267,6 +313,10 @@ class RankAndFileUnit < ContainerUnit
   def other_unit_died(unit)
     @positions.unfill!(unit, 1)
     @other_units.delete_if { |_, other_unit| other_unit == unit }
+  end
+
+  def initiative_steps(round_number)
+    call_equipment(:initiative_steps, round_number, super(round_number))
   end
 
   private
@@ -318,4 +368,3 @@ class RankAndFileUnit < ContainerUnit
     end
   end
 end
-

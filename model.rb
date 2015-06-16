@@ -15,8 +15,9 @@ class Model < Unit
     @mm_width  = mm_width
     @mm_length = mm_length
     @equipment = equipment
+    @equipment.each { |item| item.owner = self }
   end
-  
+
   def to_s
     name
   end
@@ -46,5 +47,16 @@ class Model < Unit
     name <=> other.name
   end
 
+  def call_equipment(action_to_call, round_number, starting_value, *args)
+    @equipment.reduce(starting_value) { |a, item| item.send(action_to_call, round_number, a, *args) }
+  end
+
+  def call_equipment_hook(hook_to_call, round_number, *args)
+    @equipment.each { |item| item.send(hook_to_call, round_number, *args) }
+  end
+
+  def remove_equipment(item)
+    @equipment -= [item]
+  end
 end
 

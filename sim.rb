@@ -37,7 +37,7 @@ include Equipment
 #  end
 # end
 
-NUMBER_OF_TRIALS = 5_000
+NUMBER_OF_TRIALS = 100
 
 class TrialRunner
   def initialize(&block)
@@ -60,46 +60,73 @@ def main
   #  p r
   # end
 
-  halberd = RankAndFileModel.new("halberd", 20, 20, [Halberd.new],
-                                 Stats.new(3, 3, 3, 1, 3, 1, 7, 6, 7))
-  hal = RankAndFileUnit.new_with_positions(10, halberd, 40, {}, -40, [Standard.new])
+  # halberd = RankAndFileModel.new("halberd", 20, 20, [Halberd.new],
+  #                                Stats.new(3, 3, 3, 1, 3, 1, 7, 6, 7))
+  # hal = RankAndFileUnit.new_with_positions(10, halberd, 40, {}, -40, [Standard.new])
   witch_elf = RankAndFileModel.new("witch elves", 20, 20,
                                    [PoisonAttacks.new,
                                     RerollMisses.new,
                                     ExtraHandWeapon.new,
-                                    MurderousProwess.new],
-                                   Stats.new(4, 3, 3, 1, 5, 2, 7, 7, 7))
-  wit = RankAndFileUnit.new_with_positions(7, witch_elf, 21, {}, 20, [Standard.new])
+                                    MurderousProwess.new,
+                                    MinusToHit.new(1),
+                                    Fear.new,
+                                    Frenzy.new,],
+                                   Stats.new(4, 3, 3, 1, 5, 1, 8, 7, 7))
+  wit = RankAndFileUnit.new_with_positions(10, witch_elf, 34, {}, 40, [Standard.new])
+  beast = RankAndFileModel.new("beast", 40, 40,
+                               [RandomAttacks.new(1),
+                                PoisonAttacks.new,
+                                StompAttack.new,
+                               ],
+                               Stats.new(3, 4, 5, 4, 2, 1, 7, 7, 4))
+  beasts = RankAndFileUnit.new_with_positions(7, beast, 7, {}, -40, [Daemonic.new])
 
   simulator = Simulation.new(
     NUMBER_OF_TRIALS,
     TrialRunner.new do
       [
-        Marshal.load(Marshal.dump(hal)),
-        Marshal.load(Marshal.dump(wit))
+        Marshal.load(Marshal.dump(wit)),
+        Marshal.load(Marshal.dump(beasts))
       ]
     end
   )
   results = simulator.simulate
 
   #champ   = Champion.new("champ", 20, 20, [Halberd.new], Stats.new(3, 3, 3, 1, 3, 2, 7, 6, 7))
-  halberd2 = RankAndFileModel.new("halberd", 20, 20, [Halberd.new],
-                                 Stats.new(3, 3, 3, 1, 3, 1, 7, 6, 7))
-  hal2 = RankAndFileUnit.new_with_positions(10, halberd2, 40, {}, -40, [Standard.new])
-  witch_elf2 = RankAndFileModel.new("witch elves", 20, 20,
+  # halberd2 = RankAndFileModel.new("halberd", 20, 20, [Halberd.new],
+  #                                Stats.new(3, 3, 3, 1, 3, 1, 7, 6, 7))
+  # hal2 = RankAndFileUnit.new_with_positions(10, halberd2, 40, {}, -40, [Standard.new])
+  # witch_elf2 = RankAndFileModel.new("witch elves", 20, 20,
+  #                                  [PoisonAttacks.new,
+  #                                   RerollMisses.new,
+  #                                   ExtraHandWeapon.new,
+  #                                   MurderousProwess.new],
+  #                                  Stats.new(4, 3, 3, 1, 5, 2, 7, 7, 7))
+  # wit2 = RankAndFileUnit.new_with_positions(7, witch_elf2, 21, {}, 20, [Standard.new])
+  witch_elf = RankAndFileModel.new("witch elves", 20, 20,
                                    [PoisonAttacks.new,
                                     RerollMisses.new,
                                     ExtraHandWeapon.new,
-                                    MurderousProwess.new],
-                                   Stats.new(4, 3, 3, 1, 5, 2, 7, 7, 7))
-  wit2 = RankAndFileUnit.new_with_positions(7, witch_elf2, 21, {}, 20, [Standard.new])
+                                    MurderousProwess.new,
+                                    MinusToHit.new(1),
+                                    Fear.new,
+                                    ],
+                                   Stats.new(4, 3, 3, 1, 5, 2, 8, 7, 7))
+  wit = RankAndFileUnit.new_with_positions(10, witch_elf, 34, {}, 40, [Standard.new])
+  beast = RankAndFileModel.new("beast", 40, 40,
+                               [RandomAttacks.new(1),
+                                PoisonAttacks.new,
+                                StompAttack.new,
+                               ],
+                               Stats.new(3, 4, 5, 4, 2, 1, 7, 7, 4))
+  beasts = RankAndFileUnit.new_with_positions(7, beast, 7, {}, -40, [Daemonic.new])
 
   simulator2 = Simulation.new(
     NUMBER_OF_TRIALS,
     TrialRunner.new do
       [
-        Marshal.load(Marshal.dump(hal2)),
-        Marshal.load(Marshal.dump(wit2))
+        Marshal.load(Marshal.dump(wit)),
+        Marshal.load(Marshal.dump(beasts))
       ]
     end
   )

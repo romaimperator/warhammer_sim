@@ -3,6 +3,33 @@
 # to require doing so.
 module Equipment
   class Base
+    # Any class that contains equipment must initialize this attribute so that
+    # it may be used by the equipment when needed
+    attr_accessor :owner
+    
+    # Runs at the beginning of a round of combat to be able to do things at that
+    # time such as take a fear test. Unlike the other methods, this is a pure
+    # event listener and its return value does not matter.
+    #
+    # unit - the root unit containing this equipment or containing a unit containing
+    #        this equipment
+    # target_unit - the opposing root unit
+    #
+    # returns - nothing
+    def before_combat(_round_number, _unit, _target_unit)
+      # noop
+    end
+
+    # Runs first thing after it has been determined that the unit has lost the
+    # current round of combat.
+    #
+    # unit - the unit this piece of equipment is in
+    #
+    # returns - nothing
+    def combat_round_lost(_round_number, _unit)
+      # noop
+    end
+    
     # Given the current round number and the to hit roll (value of 4 means 4+ to
     # hit), this method returns a modified to hit roll.
     # Example usage: adding +1 to hit
@@ -93,6 +120,28 @@ module Equipment
     def ward_save(_round_number, current_ward_save)
       current_ward_save
     end
+
+    def roll_break_test(_round_number, current_break_test_roll, _modifier)
+      current_break_test_roll
+    end
+
+    def check_break_test(_round_number, current_break_test_result, break_test_roll, _modfier, _unit)
+      current_break_test_result
+    end
+
+    def taken_wounds(_round_number, current_wounds_taken)
+      current_wounds_taken
+    end
+
+    # Since initiative_steps are a unique array of values, to add a value to the list
+    # the | must be used
+    # Example: current_initiative_steps | [5]
+    def initiative_steps(_round_number, current_initiative_steps)
+      current_initiative_steps
+    end
+
+    def matchups_for_initiative(_round_number, current_matchups, initiative_value, attacks, picked_target)
+      current_matchups
+    end
   end
 end
-
