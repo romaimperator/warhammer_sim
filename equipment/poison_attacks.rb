@@ -2,7 +2,7 @@ require "equipment/base"
 
 module Equipment
   class PoisonAttacks < Base
-    def initialize
+    def initialize(*args, &block)
       super
       @poison_hits = 0
     end

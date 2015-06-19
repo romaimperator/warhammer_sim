@@ -1,3 +1,6 @@
+require "equipment/base"
+require "constants"
+
 module Equipment
   class StompAttack < Base
     def initiative_steps(round_number, current_initiative_steps)
