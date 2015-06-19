@@ -9,16 +9,13 @@ require "die_roller"
 # of hits, wounds, saves, and unsaved wounds.
 class AttackMatchup
   attr_reader :round_number
-  attr_reader :attacker
-  attr_reader :attacks
+  attr_reader :attack
   attr_reader :defender
 
-  def initialize(round_number, attacker, attacks, defender)
+  def initialize(round_number, attack, defender)
     @round_number = round_number
-    @attacker = attacker
-    @attacks  = attacks
-    @defender = defender
-    @attack_stats = attacker.attack_stats(round_number)
+    @attack       = attack
+    @defender     = defender
     @defend_stats = defender.defend_stats(round_number)
   end
 
@@ -27,14 +24,20 @@ class AttackMatchup
   end
 
   def compute_wounds
-    hits = roll_hits
-    wounds = roll_wounds(hits)
+    hits = 0
+    wounds = 0
+    if @attack.weapon_skill != :auto_hit
+      hits = roll_hits
+      wounds = roll_wounds(hits)
+    else
+      wounds = roll_wounds(@attack.number)
+    end
     unsaved_wounds = roll_saves(wounds)
-    AttackMatchupResult.new(@attacks, hits, wounds, unsaved_wounds)
+    AttackMatchupResult.new(@attack.number, hits, wounds, unsaved_wounds)
   end
 
   def roll_armor_save(caused_wounds)
-    save_modifier = @attack_stats.strength > 3 ? @attack_stats.strength - 3 : 0
+    save_modifier = @attack.strength > 3 ? @attack.strength - 3 : 0
     roll_needed = @defend_stats.armor_save + save_modifier
 
     caused_wounds - count_values_higher_than(roll_dice(caused_wounds),
@@ -47,12 +50,10 @@ class AttackMatchup
   end
 
   def roll_hits
-    rolls = ComputeHits.compute(@attacks, to_hit_number,
-                                @attacker.hit_reroll_values(to_hit_number))
-    @attacker.equipment.each do |item|
-      rolls = item.roll_hits(@round_number, rolls)
-    end
-    count_values_higher_than(rolls, to_hit_number)
+    rolls = roll_dice_and_reroll(@attack.number, to_hit_number,
+                                 hit_reroll_values(to_hit_number))
+    modified_rolls = call_attack_equipment(:roll_hits, rolls)
+    count_values_higher_than(modified_rolls, to_hit_number)
   end
 
   def roll_saves(caused_wounds)
@@ -60,38 +61,43 @@ class AttackMatchup
   end
 
   def roll_wounds(hits)
-    rolls =
-      ComputeWounds.compute(hits, to_wound_number,
-                            @attacker.wound_reroll_values(to_wound_number))
-    @attacker.equipment.each do |item|
-      rolls = item.roll_wounds(@round_number, rolls)
-    end
-    count_values_higher_than(rolls, to_wound_number)
+    rolls = roll_dice_and_reroll(hits, to_wound_number,
+                                 wound_reroll_values(to_wound_number))
+    modified_rolls = call_attack_equipment(:roll_wounds, rolls)
+    count_values_higher_than(modified_rolls, to_wound_number)
   end
 
   def to_hit_number
-    roll_needed = ComputeHitNeeded.hit_needed(@attack_stats.weapon_skill,
+    roll_needed = ComputeHitNeeded.hit_needed(@attack.weapon_skill,
                                               @defend_stats.weapon_skill)
-    @attacker.equipment.each do |item|
-      roll_needed = item.hit_needed(@round_number, roll_needed)
-    end
-    roll_needed
+    call_attack_equipment(:hit_needed, roll_needed)
   end
 
   def to_wound_number
-    roll_needed = ComputeWoundNeeded.wound_needed(@attack_stats.strength,
+    roll_needed = ComputeWoundNeeded.wound_needed(@attack.strength,
                                                   @defend_stats.toughness)
-    @attacker.equipment.each do |item|
-      roll_needed = item.wound_needed(@round_number, roll_needed)
-    end
-    roll_needed
+    call_attack_equipment(:wound_needed, roll_needed)
+  end
+
+  def wound_reroll_values(to_wound_number)
+    call_attack_equipment(:wound_reroll_values, [], to_wound_number).uniq
+  end
+
+  def hit_reroll_values(to_hit_number)
+    call_attack_equipment(:hit_reroll_values, [], to_hit_number).uniq
   end
 
   def ==(other)
     round_number == other.round_number &&
-      attacker == other.attacker &&
-      attacks  == other.attacks &&
-      defender == other.defender
+      attack  == other.attack
+  end
+
+  private
+
+  def call_attack_equipment(action_to_call, starting_value, *args)
+    @attack.equipment.reduce(starting_value) do |result, item|
+      item.send(action_to_call, @round_number, result, *args)
+    end
   end
 end
 

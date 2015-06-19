@@ -2,10 +2,12 @@ require 'inline'
 
 require "container_unit"
 require "rank_list"
+require "rank_and_file_rank_list"
 require "alignment_strategy"
 require "target_finder"
 require "target_strategy"
 require "equipment"
+require "attack"
 
 class MyTest
   inline do |builder|
@@ -171,7 +173,7 @@ class RankAndFileUnit < ContainerUnit
   end
 
   def take_wounds(number_of_wounds)
-    puts "beginning size #{@size} of #{@container_unit.name}"
+    # puts "beginning size #{@size} of #{@container_unit.name}"
     number_of_wounds += @leftover_wounds
     @leftover_wounds = 0
     if @size * @container_unit.wounds >= number_of_wounds
@@ -186,7 +188,7 @@ class RankAndFileUnit < ContainerUnit
     if number_of_ranks <= 1
       @interval_target_cache = {}
     end
-    puts "ending size #{@size} of #{@container_unit.name}"
+    # puts "ending size #{@size} of #{@container_unit.name}"
   end
 
   def restore_wounds(number_of_wounds)
@@ -226,6 +228,81 @@ class RankAndFileUnit < ContainerUnit
                               file * @container_unit.mm_width]
     end
     intervals
+  end
+
+  def build_matchups(round_number, initiative_value, target_unit)
+    (other_unit_model_intervals(round_number, initiative_value) + rank_and_file_model_intervals(round_number, initiative_value)).map do |lower_interval, upper_interval, attacks|
+      if !attacks.empty? && (target = pick_target([lower_interval, upper_interval], target_unit))
+        [target, attacks]
+      else
+        next
+      end
+    end.compact.group_by do |element|
+      element[0]
+    end.map do |(target, grouped_by_array)|
+      attacks = grouped_by_array.flat_map { |target, attack| attack }
+      [target, Attack.join(attacks)]
+    end.flat_map do |target, attacks|
+      attacks.map { |attack| AttackMatchup.new(round_number, attack, target) }
+    end
+  end
+
+  def pick_target(interval, target_unit)
+    targets = target_unit.targets_in_intervals([interval])
+    target_list, count = targets.first
+    # puts "target_list: #{target_list}"
+    if target_list
+      target_strategy = TargetStrategy::RankAndFileFirst.new(@container_unit, target_unit)
+      target_strategy.pick(target_list)
+    else
+      nil
+    end
+  end
+
+  def other_unit_model_intervals(round_number, initiative_value)
+    @other_units.map do |(rank, file), other_unit|
+      attacks = other_unit.attacks(round_number, initiative_value, rank)
+      [*compute_interval(file, other_unit.mm_width), attacks]
+    end
+  end
+
+  def rank_and_file_model_intervals(round_number, initiative_value)
+    @positions.find_each(rank_and_file).map do |rank, file, unit|
+      attacks = unit.attacks(round_number, initiative_value, rank)
+      [*compute_interval(file, @container_unit.mm_width), attacks]
+    end
+  end
+
+  def all_model_intervals(round_number, initiative_value, target_unit)
+    @positions.each_model.map do |rank, file, unit|
+      attacks = unit.attacks(round_number, initiative_value, rank)
+      lower_interval, upper_interval = compute_interval(file, unit.mm_width)
+      if !attacks.empty? && (target = pick_target([lower_interval, upper_interval], target_unit))
+        [target, attacks]
+      else
+        next
+      end
+    end.compact
+  end
+
+  def build_matchups2(round_number, initiative_value, target_unit)
+    group_attacks(round_number, all_model_intervals(round_number, initiative_value, target_unit))
+  end
+
+  def group_attacks(round_number, targets_with_attacks)
+    targets_with_attacks.group_by do |element|
+      element[0]
+    end.map do |(target, grouped_by_array)|
+      attacks = grouped_by_array.flat_map { |target, attack| attack }
+      [target, Attack.join(attacks)]
+    end.flat_map do |target, attacks|
+      attacks.map { |attack| AttackMatchup.new(round_number, attack, target) }
+    end
+  end
+
+  def compute_interval(file, model_width)
+    lower = (file - 1) * @container_unit.mm_width
+    [lower, lower + model_width]
   end
 
   def rank_and_file_matchups(initiative_value, round_number, target_unit)
@@ -323,7 +400,7 @@ class RankAndFileUnit < ContainerUnit
 
   def assign_positions
     return if @size < 0
-    @positions = RankList.new(@files, number_of_ranks, CenterAlignStrategy)
+    @positions = RankAndFileRankList.new(RankList.new(@files, number_of_ranks, CenterAlignStrategy), rank_and_file)
     assign_other_units
     @positions.fill!(@container_unit, @size)
   end

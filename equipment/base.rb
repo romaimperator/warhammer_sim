@@ -1,3 +1,5 @@
+require "die_roller"
+
 # This is the base class for all equipment. The given method definitions do not
 # modify anything which allows for only the methods that need to be overriden
 # to require doing so.
@@ -6,7 +8,7 @@ module Equipment
     # Any class that contains equipment must initialize this attribute so that
     # it may be used by the equipment when needed
     attr_accessor :owner
-    
+
     # Runs at the beginning of a round of combat to be able to do things at that
     # time such as take a fear test. Unlike the other methods, this is a pure
     # event listener and its return value does not matter.
@@ -17,9 +19,12 @@ module Equipment
     #
     # returns - nothing
     def before_combat(_round_number, _unit, _target_unit)
-      # noop
+      # NOOP
     end
 
+    def after_combat(_round_number, _unit, _target_unit)
+      # NOOP
+    end
     # Runs first thing after it has been determined that the unit has lost the
     # current round of combat.
     #
@@ -27,9 +32,9 @@ module Equipment
     #
     # returns - nothing
     def combat_round_lost(_round_number, _unit)
-      # noop
+      # NOOP
     end
-    
+
     # Given the current round number and the to hit roll (value of 4 means 4+ to
     # hit), this method returns a modified to hit roll.
     # Example usage: adding +1 to hit
@@ -142,6 +147,10 @@ module Equipment
 
     def matchups_for_initiative(_round_number, current_matchups, initiative_value, attacks, picked_target)
       current_matchups
+    end
+
+    def pending_attacks(_round_number, current_pending_attacks, initiative_value)
+      current_pending_attacks
     end
   end
 end

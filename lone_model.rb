@@ -69,7 +69,7 @@ class LoneModel < Model
       interval = [[left, right]]
       target_list, count  = *target_unit.targets_in_intervals(interval)
       target_strategy = TargetStrategy::RankAndFileFirst.new(self, target_unit)
-      matchups << AttackMatchup.new(round_number, self, attacks(round_number, 1), 
+      matchups << AttackMatchup.new(round_number, self, attacks(round_number, 1),
                                     target_strategy.pick(target_list))
     end
     interval = [[left, right]]
@@ -102,7 +102,20 @@ class LoneModel < Model
     item_manipulation(round_number, :initiative, @stats.initiative)
   end
 
-  def attacks(round_number, rank)
+  def make_attack(round_number:, number:, weapon_skill: weapon_skill(round_number),
+                  strength: strength(round_number), equipment: self.equipment)
+    Attack.new(number, weapon_skill, strength, equipment)
+  end
+
+  def attacks(round_number, initiative_value, rank)
+    pending_attacks = []
+    if initiative(round_number) == initiative_value && (count = attack_count(round_number, rank)) > 0
+      pending_attacks << make_attack(round_number: round_number, number: count)
+    end
+    call_equipment(:pending_attacks, round_number, pending_attacks, initiative_value)
+  end
+
+  def attack_count(round_number, rank)
     if rank == 1
       # item_manipulation(round_number, :attacks, @stats.attacks, parent_unit, rank)
       equipment.reduce(@stats.attacks) do |result, item|

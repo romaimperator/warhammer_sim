@@ -18,6 +18,8 @@ require "simulation"
 require "simulation_printer"
 require "equipment"
 require "stats"
+require "pp"
+require "benchmark"
 
 include Equipment
 
@@ -37,7 +39,7 @@ include Equipment
 #  end
 # end
 
-NUMBER_OF_TRIALS = 100
+NUMBER_OF_TRIALS = 10_000
 
 class TrialRunner
   def initialize(&block)
@@ -76,11 +78,18 @@ def main
   beast = RankAndFileModel.new("beast", 40, 40,
                                [RandomAttacks.new(1),
                                 PoisonAttacks.new,
-                                StompAttack.new,
                                ],
                                Stats.new(3, 4, 5, 4, 2, 1, 7, 7, 4))
+  champ   = Champion.new("champ", 80, 40, [Halberd.new], Stats.new(3, 3, 3, 1, 2, 2, 7, 6, 7))
   beasts = RankAndFileUnit.new_with_positions(7, beast, 7, {}, -40, [Daemonic.new])
 
+  # pp wit.build_matchups(1, 5, beasts).to_a
+  # pp wit.build_matchups2(1, 5, beasts).to_a
+  # exit
+
+  # pp beasts.build_matchups(2, 2, wit).to_a
+  # pp beasts.build_matchups2(2, 2, wit).to_a
+  # exit
   simulator = Simulation.new(
     NUMBER_OF_TRIALS,
     TrialRunner.new do
@@ -110,8 +119,8 @@ def main
                                     MurderousProwess.new,
                                     MinusToHit.new(1),
                                     Fear.new,
-                                    ],
-                                   Stats.new(4, 3, 3, 1, 5, 2, 8, 7, 7))
+                                    Frenzy.new,],
+                                   Stats.new(4, 3, 3, 1, 5, 1, 8, 7, 7))
   wit = RankAndFileUnit.new_with_positions(10, witch_elf, 34, {}, 40, [Standard.new])
   beast = RankAndFileModel.new("beast", 40, 40,
                                [RandomAttacks.new(1),

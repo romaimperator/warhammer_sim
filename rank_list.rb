@@ -62,7 +62,21 @@ class RankList
     @the_grid == other.the_grid
   end
 
+  def each_position
+    return to_enum(__callee__) unless block_given?
+
+    @the_grid.each_with_index do |rank, rank_number|
+      rank.each_with_index do |file, file_number|
+        if file
+          yield rank_number + 1, file_number + 1, file
+        end
+      end
+    end
+  end
+
   def find_each(find_value)
+    return to_enum(__callee__, find_value) unless block_given?
+
     @the_grid.each_with_index do |rank, rank_number|
       rank.each_with_index do |file, file_number|
         if file == find_value
@@ -84,4 +98,3 @@ class RankList
     @ranks    = @the_grid.size
   end
 end
-

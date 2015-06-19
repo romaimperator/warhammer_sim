@@ -22,10 +22,10 @@ class Round
   end
 
   def build_matchups(initiative_value)
-    attacker_matchups = attacker.matchups_for_initiative(initiative_value,
-                                                         @number, defender)
-    defender_matchups = defender.matchups_for_initiative(initiative_value,
-                                                         @number, attacker)
+    attacker_matchups = attacker.build_matchups2(@number, initiative_value,
+                                                defender)
+    defender_matchups = defender.build_matchups2(@number, initiative_value,
+                                                attacker)
     [attacker_matchups, defender_matchups]
   end
 
@@ -36,12 +36,14 @@ class Round
 
   def simulate
     run_before_combat_hooks
-    
+
     attacker_result = AttackMatchupResult.new(0, 0, 0, 0)
     defender_result = AttackMatchupResult.new(0, 0, 0, 0)
     initiative_steps.reverse_each do |initiative_value|
+      next if attacker.dead? || defender.dead?
       all_matchups = build_matchups(initiative_value)
       all_matchups.map! { |matchup_group| matchup_group.map! { |matchup| [matchup, matchup.attack] } }
+      # p all_matchups
       all_matchups.each do |results|
         results.map! do |matchup, result|
           matchup.defender.take_wounds(result.unsaved_wounds)
@@ -78,6 +80,11 @@ class Round
   def run_before_combat_hooks
     attacker.call_equipment_hook(:before_combat, @number, @attacker, @defender)
     defender.call_equipment_hook(:before_combat, @number, @defender, @attacker)
+  end
+
+  def run_after_combat_hooks
+    attacker.call_equipment_hook(:after_combat, @number, @attacker, @defender)
+    defender.call_equipment_hook(:after_combat, @number, @defender, @attacker)
   end
 end
 
