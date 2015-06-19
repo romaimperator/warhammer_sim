@@ -69,18 +69,14 @@ Part = Struct.new(:name, :_weapon_skill, :_strength, :_toughness, :_wounds,
   end
 
   def dead?
-    wounds <= 0
+    _wounds <= 0
   end
 
   def take_wounds(wounds_caused)
     return if dead?
 
-    if model == model.unit.model
-      model.unit.take_wounds(wounds_caused)
-    else
-      self._wounds -= wounds_caused
-      model.notify_part_died(self) if dead?
-    end
+    self._wounds -= wounds_caused
+    model.notify_part_died(self) if dead?
   end
 
   private
