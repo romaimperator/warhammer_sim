@@ -3,7 +3,7 @@
 set -e
 
 function run_rbenv {
-    rbenv shell 2&>1 > /dev/null
+    rbenv shell 2>&1 > /dev/null
 }
 if ! run_rbenv ; then
     eval "$(rbenv init -)"
