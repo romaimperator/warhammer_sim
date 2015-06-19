@@ -1,5 +1,5 @@
 require "spec_helper"
-require "equipment"
+require "equipment/extra_hand_weapon"
 
 module Equipment
   describe ExtraHandWeapon do

@@ -1,5 +1,5 @@
 require "spec_helper"
-require "equipment"
+require "equipment/fear"
 
 module Equipment
   describe Fear do

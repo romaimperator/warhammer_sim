@@ -1,5 +1,5 @@
 require "spec_helper"
-require "equipment"
+require "equipment/daemonic"
 
 module Equipment
   describe Daemonic do

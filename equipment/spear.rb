@@ -2,11 +2,11 @@ require "equipment/base"
 
 module Equipment
   class FootSpear < Base
-    def attacks(round_number, current_attacks, unit)
-      if unit.is_horde?
-        current_attacks + unit.models_in_rank(4)
+    def attacks(round_number, current_attacks, unit, rank)
+      if (unit.is_horde? && rank == 4) || rank <= 3
+        current_attacks
       else
-        current_attacks + unit.models_in_rank(3)
+        0
       end
     end
   end
