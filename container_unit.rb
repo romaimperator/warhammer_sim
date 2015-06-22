@@ -1,8 +1,10 @@
+require "unit"
+
 # This class defines the required information for a unit that can contain other units.
 # It acts as the base class for RankAndFileUnits.
 class ContainerUnit < Unit
   attr_accessor :contained_units
-  
+
   def initialize(contained_units)
     @contained_units = contained_units
     contained_units.each { |unit| unit.parent_unit = self }

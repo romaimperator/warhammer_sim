@@ -1,13 +1,14 @@
 require "spec_helper"
-require "rank_and_file_model"
+require "factories/rank_and_file_model_factory"
+require "rank_and_file_unit" # load to use verifying double
 
 describe RankAndFileModel do
   describe "#take_wounds" do
     it "tells the parent unit to take its wounds" do
-      model = RankAndFileModel.new(name, [], 20, 20, [])
-      model.unit = spy
+      model = RankAndFileModelFactory.new.build
+      model.parent_unit = instance_spy("RankAndFileUnit")
       model.take_wounds(5)
-      expect(model.unit).to have_received(:take_wounds)
+      expect(model.parent_unit).to have_received(:take_wounds).with(5)
     end
   end
 end

@@ -39,7 +39,7 @@ include Equipment
 #  end
 # end
 
-NUMBER_OF_TRIALS = 10_000
+NUMBER_OF_TRIALS = 100
 
 class TrialRunner
   def initialize(&block)

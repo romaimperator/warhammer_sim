@@ -13,6 +13,7 @@ Attack = Struct.new(:number, :weapon_skill, :strength, :equipment) do
   end
 
   # Combines two attacks together assuming they are compatible
+  # TODO: change this to only work with identical subtypes and return that type
   #
   # other - an Attack object to combine with
   #
@@ -22,7 +23,7 @@ Attack = Struct.new(:number, :weapon_skill, :strength, :equipment) do
     fail TypeError, "#{other} is not a compatible type with Attack" unless other.kind_of?(Attack)
 
     if weapon_skill == other.weapon_skill && strength == other.strength && equipment == other.equipment
-      Attack.new(number + other.number, weapon_skill, strength, equipment)
+      self.class.new(number + other.number, weapon_skill, strength, equipment)
     else
       fail TypeError, "#{self} and #{other} do not have compatible values"
     end
