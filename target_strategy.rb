@@ -29,5 +29,16 @@ module TargetStrategy
       end
     end
   end
+
+  class NonRankAndFileFirst < Base
+    def pick(targets)
+      targets -= [@defender.rank_and_file]
+      if !targets.empty?
+        RandomTarget.new.pick(targets)
+      else
+        @defender.rank_and_file
+      end
+    end
+  end
 end
 
