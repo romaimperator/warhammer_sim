@@ -400,7 +400,7 @@ class RankAndFileUnit < ContainerUnit
 
   def assign_positions
     return if @size < 0
-    @positions = RankAndFileRankList.new(RankList.new(@files, number_of_ranks, CenterAlignStrategy), rank_and_file)
+    @positions = RankAndFileRankList.new(RankList.new(@files, number_of_ranks, AlignmentStrategy::Center), rank_and_file)
     assign_other_units
     @positions.fill!(@container_unit, @size)
   end
