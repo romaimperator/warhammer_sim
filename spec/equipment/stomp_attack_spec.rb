@@ -22,7 +22,9 @@ module Equipment
         subject.owner = owner
         # expect the attack (owner because of the return value of the spy)
         assert_equal [owner], subject.pending_attacks(1, [], ALWAYS_STRIKE_LAST_INITIATIVE_VALUE)
-        expect(owner).to have_received(:make_attack).with(round_number: 1, number: 1, weapon_skill: :auto_hit)
+        expect(owner).to have_received(:make_attack).with(round_number: 1, number: 1,
+                                                          weapon_skill: :auto_hit,
+                                                          equipment: [])
       end
 
       it "does nothing if a different initiative value" do
