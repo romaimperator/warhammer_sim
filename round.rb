@@ -43,7 +43,7 @@ class Round
       next if attacker.dead? || defender.dead?
       all_matchups = build_matchups(initiative_value)
       all_matchups.map! { |matchup_group| matchup_group.map! { |matchup| [matchup, matchup.attack] } }
-      # p all_matchups
+      #p all_matchups
       all_matchups.each do |results|
         results.map! do |matchup, result|
           matchup.defender.take_wounds(result.unsaved_wounds)

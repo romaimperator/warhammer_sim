@@ -249,7 +249,7 @@ class RankAndFileUnit < ContainerUnit
 
   def pick_target(interval, target_unit)
     targets = target_unit.targets_in_intervals([interval])
-    target_list, count = targets.first
+    target_list, _ = targets.first
     # puts "target_list: #{target_list}"
     if target_list
       target_strategy = TargetStrategy::RankAndFileFirst.new(@container_unit, target_unit)
