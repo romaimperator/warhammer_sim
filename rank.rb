@@ -13,9 +13,11 @@ class RankHelper
     }"
   end
 end
+
 class Rank
-  attr_reader :rank,
-              :files
+  attr_reader :rank
+  attr_reader :files
+  attr_reader :empty_spaces
 
   def initialize(files, values=[])
     @files = files

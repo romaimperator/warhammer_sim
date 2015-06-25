@@ -37,13 +37,28 @@ describe Rank do
       rank = Rank.new(3, [1, 3])
       assert_equal 0, rank.adjust_empty_spaces(2, 2)
     end
+
+    it "stays the same when assigning a new value to a filled space" do
+      rank = Rank.new(3, [1, 2, 3])
+      assert_equal 0, rank.adjust_empty_spaces(2, 2)
+    end
   end
 
   describe "#each_with_index" do
     it "passes through to the @rank's method" do
       rank = Rank.new(3, [1, 2, 3])
-      expect(rank.rank).to receive(:each_with_index)
+      allow(rank.rank).to receive(:each_with_index)
       rank.each_with_index { |_, index| index }
+      expect(rank.rank).to have_received(:each_with_index)
+    end
+  end
+
+  describe "#each" do
+    it "passes through to the @rank's method" do
+      rank = Rank.new(3, [1, 2, 3])
+      allow(rank.rank).to receive(:each)
+      rank.each { |_, index| index }
+      expect(rank.rank).to have_received(:each)
     end
   end
 
@@ -61,12 +76,29 @@ describe Rank do
     end
   end
 
+  describe "#empty?" do
+    it "is true when there are only empty spaces" do
+      rank = Rank.new(3, [])
+      assert_equal true, rank.empty?
+    end
+
+    it "is false when there are any filled spaces" do
+      rank = Rank.new(5, [nil, nil, nil, 3, nil])
+      assert_equal false, rank.empty?
+    end
+  end
+
   describe "#fill_blank_spaces" do
     it "adds nil values for empty spaces" do
       rank = Rank.new(3, [])
       assert_equal [nil, nil, nil], rank.rank
       rank = Rank.new(3, [1])
       assert_equal [1, nil, nil], rank.rank
+    end
+
+    it "adds no nil values when already full" do
+      rank = Rank.new(3, [1, 2, 3])
+      assert_equal [1, 2, 3], rank.rank
     end
   end
 
@@ -81,6 +113,26 @@ describe Rank do
       rank = Rank.new(3, [])
       rank.fill!("value", 2)
       assert_equal ["value", "value", nil], rank.rank
+    end
+
+    it "adjusts the number of empty spaces" do
+      rank = Rank.new(3, [])
+      rank.fill!("value", 2)
+      assert_equal 1, rank.empty_spaces
+    end
+  end
+
+  describe "#==" do
+    it "is equal if the rank array matches and the number of files matches" do
+      assert_equal Rank.new(3, [1, 2]), Rank.new(3, [1, 2])
+    end
+
+    it "is not equal if the rank array differs" do
+      refute_equal Rank.new(3, [1]), Rank.new(3, [1, 2])
+    end
+
+    it "is not equal if the number of files differs" do
+      refute_equal Rank.new(2, [1, 2]), Rank.new(3, [1, 2])
     end
   end
 

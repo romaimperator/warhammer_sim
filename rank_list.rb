@@ -1,9 +1,10 @@
-require 'rank'
+require "rank"
+require "alignment_strategy"
 
 class RankList
   attr_reader :the_grid
 
-  def initialize(files, ranks, alignment_strategy=CenterAlignStrategy)
+  def initialize(files, ranks, alignment_strategy=AlignmentStrategy::Center)
     @files              = files
     @ranks              = ranks
     @the_grid           = ranks.times.map { Rank.new(files, []) }
@@ -77,11 +78,9 @@ class RankList
   def find_each(find_value)
     return to_enum(__callee__, find_value) unless block_given?
 
-    @the_grid.each_with_index do |rank, rank_number|
-      rank.each_with_index do |file, file_number|
-        if file == find_value
-          yield rank_number + 1, file_number + 1, file
-        end
+    each_position do |rank, file, unit|
+      if unit == find_value
+        yield rank, file, unit
       end
     end
   end
