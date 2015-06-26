@@ -33,7 +33,7 @@ class Model < Unit
   def defend_stats(round_number)
     fail NotYetImplemented
   end
-  
+
   def hash
     @hash ||= name.hash
   end
@@ -57,6 +57,14 @@ class Model < Unit
 
   def remove_equipment(item)
     @equipment -= [item]
+  end
+
+  def left
+    0
+  end
+
+  def right
+    mm_width
   end
 end
 

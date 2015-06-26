@@ -2,6 +2,8 @@ require "model"
 require "stats"
 
 class LoneModel < Model
+  attr_reader :manipulations_store
+
   def initialize(*args, stats, &block)
     super(*args, &block)
     @stats = stats
@@ -43,6 +45,7 @@ class LoneModel < Model
 
   def take_wounds(wounds_caused)
     @stats.wounds -= wounds_caused
+    cache_clear(:any, [:wounds])
     if dead? && parent_unit
       parent_unit.other_unit_died(self)
     end
@@ -165,6 +168,19 @@ class LoneModel < Model
       @manipulations_store[round_number] = {}
     end
     @manipulations_store[round_number][cache_key] ||= yield
+  end
+
+  def cache_clear(round_number, cache_key)
+    if round_number == :any
+      @manipulations_store.each do |round_number, cache|
+        cache.delete(cache_key)
+      end
+    else
+      unless @manipulations_store[round_number]
+        @manipulations_store[round_number] = {}
+      end
+      @manipulations_store[round_number].delete(cache_key)
+    end
   end
 
   def convert_interval(interval)

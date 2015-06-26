@@ -1,11 +1,12 @@
 require "spec_helper"
 require "target_strategy"
 require "factories/rank_and_file_unit_factory"
+require "factories/model_factory"
 
 module TargetStrategy
   describe RankAndFileFirst do
     let(:rank_and_file) { ModelFactory.new.build }
-    let(:defender) { RankAndFileUnitFactory.new }
+    let(:defender) { RankAndFileUnitFactory() }
     subject { RankAndFileFirst.new(nil, defender) }
 
     it "returns the rank and file unit when it is a target" do
@@ -24,7 +25,7 @@ module TargetStrategy
 
   describe NonRankAndFileFirst do
     let(:rank_and_file) { ModelFactory.new.build }
-    let(:defender) { RankAndFileUnitFactory.new }
+    let(:defender) { RankAndFileUnitFactory() }
     subject { NonRankAndFileFirst.new(nil, defender) }
 
     it "returns the non-rank and file unit when there is one" do

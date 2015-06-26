@@ -4,8 +4,8 @@ require "factories/rank_and_file_unit_factory"
 require "attack_matchup_result"
 
 describe CombatResolution do
-  let(:attacker) { RankAndFileUnitFactory.new.build_positions }
-  let(:defender) { RankAndFileUnitFactory.new.build_positions }
+  let(:attacker) { RankAndFileUnitFactory() }
+  let(:defender) { RankAndFileUnitFactory() }
   let(:attacker_result) { AttackMatchupResult.new(0, 0, 0, 5) }
   let(:defender_result) { AttackMatchupResult.new(0, 0, 0, 1) }
   subject { CombatResolution.new(1, attacker, defender, attacker_result, defender_result) }
