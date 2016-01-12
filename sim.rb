@@ -49,7 +49,7 @@ class Copy
   end
 end
 
-NUMBER_OF_TRIALS = 99
+NUMBER_OF_TRIALS = 10_000
 
 class TrialRunner
   def initialize(&block)
@@ -173,7 +173,6 @@ def main
 
   simulations = [
     [wit, beasts],
-    [beasts, wit],
   ]
 
   index = 0

@@ -1,7 +1,6 @@
 require "pp"
 
 require "round_result"
-require "round_stats"
 require "compute_hits"
 require "compute_wounds"
 require "attack_matchup"
@@ -54,8 +53,7 @@ class Round
       defender_result = all_matchups[1].reduce(defender_result, &:+)
     end
 
-    #p attacker.positions
-    #p defender.positions
+    run_after_combat_hooks
 
     RoundResult.new(
       compute_outcome(attacker, defender, attacker_result, defender_result),
